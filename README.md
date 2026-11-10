@@ -90,3 +90,29 @@ personal-cv-portfolio/
 
 ## 💾 Veri Yedekleme
 Verileriniz `data/cv-data.json` dosyasında güvenle saklanır. Harici bir veritabanı kurulumu gerektirmez. Paneldeki **"Yedekleme & Geri Yükle"** menüsünden verilerinizi tek tıkla indirebilir veya yükleyebilirsiniz.
+
+---
+
+## 🚀 GitHub Üzerinden Otomatik Deploy (Canlıya Alma)
+
+Bu proje GitHub ile tam entegre çalışacak şekilde yapılandırılmıştır. GitHub deponuza her `git push` yaptığınızda sitenizin otomatik olarak yayına girmesi için en popüler iki ücretsiz yöntem:
+
+### Seçenek 1: Render.com ile Otomatik Canlıya Alma (Önerilen - Ücretsiz)
+1. **[render.com](https://render.com)** adresine gidin ve GitHub hesabınızla giriş yapın.
+2. **"New +" -> "Web Service"** seçeneğine tıklayın.
+3. GitHub deponuzu (`personal-cv-portfolio`) seçin.
+4. Render projedeki `render.yaml` dosyasını otomatik algılayacaktır.
+5. **"Create Web Service"** butonuna basın.
+6. Artık her GitHub'a kod gönderdiğinizde (push) Render sitenizi otomatik olarak derleyip yayınlayacaktır! Size ücretsiz bir `https://...onrender.com` adresi verecektir.
+
+### Seçenek 2: Railway.app ile Otomatik Deploy
+1. **[railway.app](https://railway.app)** adresine gidip GitHub ile giriş yapın.
+2. **"New Project" -> "Deploy from GitHub repo"** adımlarını izleyin.
+3. Projedeki `Dockerfile` otomatik algılanır ve birkaç saniye içinde canlıya alınır.
+
+### Seçenek 3: Kendi Sunucunuzda Docker ile Çalıştırma
+```bash
+docker build -t personal-cv .
+docker run -d -p 3000:3000 --name cv-app -v $(pwd)/data:/app/data -v $(pwd)/public/uploads:/app/public/uploads personal-cv
+```
+

@@ -1,0 +1,57 @@
+name: Otomatik Test ve Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-and-verify:
+    name: 🧪 Doğrulama ve Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Depoyu Klonla (Checkout)
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Node.js Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Bağımlılıkları Yükle
+        run: npm ci
+
+      - name: 🔍 Kod Sözdizimi Kontrolü (Syntax Check)
+        run: node -c server.js
+
+      - name: 🚀 Duman Testi (Sunucu Başlatma & API Testi)
+        run: |
+          node server.js &
+          SERVER_PID=$!
+          sleep 3
+          curl --fail http://localhost:3000/api/cv || exit 1
+          echo "API ve Sunucu Başarıyla Doğrulandı!"
+          kill $SERVER_PID
+
+  trigger-deploy:
+    name: 🚀 Otomatik Deploy Tetikleme
+    needs: test-and-verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🌐 Deploy Hook Çağrısı (Render / Özel Webhook)
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$DEPLOY_HOOK" ]; then
+            echo "Deploy Webhook tetikleniyor..."
+            curl -X POST "$DEPLOY_HOOK"
+            echo "Deploy başarıyla tetiklendi!"
+          else
+            echo "Bilgi: RENDER_DEPLOY_HOOK tanımlanmadı. Render.com veya Railway doğrudan GitHub bağlantısı ile otomatik deploy yapacaktır."
+          fi
