@@ -105,7 +105,8 @@ GitHub reponuzda **Settings > Secrets and variables > Actions** sayfasına gidin
 | `FTP_SERVER` | Hosting FTP sunucu adresi *(workflow env'den de ayarlanabilir)* | `ftp.alanadiniz.com` |
 | `FTP_USERNAME` | FTP kullanıcı adınız | `u12345678` veya `admin@alanadiniz.com` |
 | `FTP_PASSWORD` | FTP parolanız | `SuperGizliSifre123!` |
-| `FTP_DIR` | Sunucudaki hedef klasör *(opsiyonel)* | Plesk için `/httpdocs/`, cPanel için `/public_html/` *(varsayılan: `/httpdocs/`)* |
+| `FTP_DIR` | Sunucudaki hedef klasör | Plesk için `/httpdocs/`, cPanel için `/public_html/`, doğrudan site klasörüne bağlı FTP kullanıcısı için `./` *(varsayılan: `/httpdocs/`)* |
+| `FTP_PROTOCOL` | *(Opsiyonel)* Bağlantı türü | `ftps` *(varsayılan, güvenli TLS)* veya `ftp` *(düz)* |
 
 ### 🛠️ Deploy Akışı Nasıl Çalışır?
 1. **Doğrulama:** Node.js ortamı hazırlanır ve `server.js` sözdizimi kontrol edilir.

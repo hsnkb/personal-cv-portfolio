@@ -1,18 +1,22 @@
 # main dalina her push'ta projeyi hazirlar ve FTP ile sunucuya (Plesk / cPanel / IIS) yukler.
-# ArsCarDirect projesindeki deploy ayarlari ve mimarisi ile birebir aynidir:
+# ArsCarDirect projesindeki deploy mimarisi esas alinarak yapilandirilmistir:
 #   - Windows runner uzerinde calisir
 #   - Node.js bagimliliklarini kurup server.js soz dizimini dogrular
 #   - Dagitim dosyalarini (api, data, public, .htaccess, node dosyalari) publish klasorune derler
 #   - Yukleme sirasinda 'app_offline.htm' ile siteyi bakima alir (Plesk/IIS ve Apache destekli)
-#   - SamKirkland/FTP-Deploy-Action@v4.3.5 ile sadece degisen dosyalari sunucuya aktarir
+#   - SamKirkland/FTP-Deploy-Action@v4.3.5 ile FTPS/TLS uzerinden sadece degisen dosyalari aktarir
 #   - Sunucuda kullanicinin yukledigi resimleri (public/uploads/) korur, asla silmez/ezmez
 #   - Islem tamamlandiginda 'app_offline.htm' dosyasini silerek siteyi tekrar yayina acar
 #
 # Gerekli GitHub Secret'lari (GitHub Deposu > Settings > Secrets and variables > Actions):
-#   FTP_SERVER          FTP sunucu adresi (Orn: ftp.alanadiniz.com) - dilerseniz asagidaki env'den de belirtebilirsiniz
+#   FTP_SERVER          FTP sunucu adresi (Orn: ftp.alanadiniz.com)
 #   FTP_USERNAME        FTP kullanici adi
 #   FTP_PASSWORD        FTP sifresi
-#   FTP_DIR             Sunucudaki hedef klasor (Plesk icin /httpdocs/, cPanel icin /public_html/) [Varsayilan: /httpdocs/]
+#   FTP_DIR             Sunucudaki hedef klasor:
+#                         * Plesk ana hesabi icin: /httpdocs/
+#                         * cPanel ana hesabi icin: /public_html/
+#                         * Dogrudan site klasorune tanimli FTP kullanicisi icin: ./
+#   FTP_PROTOCOL        (Opsiyonel) 'ftps' (varsayilan, onerilen) veya 'ftp' (duz baglanti)
 
 name: Deploy to Production via FTP
 
@@ -71,8 +75,12 @@ jobs:
             throw "FTP_USERNAME veya FTP_PASSWORD secret'i tanimli degil. Lutfen GitHub Repository Settings > Secrets and variables > Actions bolumunden ekleyin."
           }
           Set-Content app_offline.htm '<!doctype html><meta charset="utf-8"><title>Guncelleniyor</title><p style="font-family:sans-serif;text-align:center;margin-top:20vh;color:#333;font-size:18px;">Site kisa bir sure icin guncelleniyor, lutfen birazdan tekrar deneyin.</p>'
-          curl.exe --fail --silent --show-error --ftp-pasv -T app_offline.htm --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)"
-          Start-Sleep -Seconds 5
+          try {
+            curl.exe --silent --show-error --ftp-pasv --insecure -T app_offline.htm --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)"
+          } catch {
+            Write-Warning "app_offline.htm yuklenemedi, deploy adimina geciliyor."
+          }
+          Start-Sleep -Seconds 3
 
       - name: FTP ile yukle
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -80,6 +88,10 @@ jobs:
           server: ${{ env.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftps' }}
+          security: loose
+          timeout: 180000
+          log-level: verbose
           local-dir: ./publish/
           server-dir: ${{ env.FTP_DIR }}
           # Sunucudaki dosyalar silinmez; sadece degisen dosyalar yuklenir.
@@ -99,5 +111,5 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           if (-not [string]::IsNullOrWhiteSpace($env:FTP_USERNAME) -and -not [string]::IsNullOrWhiteSpace($env:FTP_PASSWORD)) {
-            curl.exe --fail --silent --show-error --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)" -Q "DELE $($env:FTP_DIR)app_offline.htm"
+            curl.exe --silent --show-error --ftp-pasv --insecure --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)" -Q "DELE $($env:FTP_DIR)app_offline.htm"
           }
