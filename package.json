@@ -1,0 +1,21 @@
+{
+  "name": "personal-cv-portfolio",
+  "version": "1.0.0",
+  "description": "Kişisel CV ve Portfolyo Web Sitesi - Yönetim Paneli ile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["cv", "portfolio", "admin", "resume"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "profile": {
+    "name": "Ahmet Yılmaz",
+    "title": "Kıdemli Full Stack Yazılım Geliştirici",
+    "email": "iletisim@ahmetyilmaz.dev",
+    "phone": "+90 (555) 123 45 67",
+    "location": "İstanbul, Türkiye",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    "status": "Yeni projelere & fırsatlara açık",
+    "bio": "Modern web teknolojileri, bulut mimarileri ve kullanıcı odaklı sistemler geliştiren kıdemli yazılım mühendisi. 6+ yıllık tecrübemle yüksek erişilebilirlikli backend mimarileri ve modern kullanıcı arayüzleri inşa ediyorum.",
+    "social": {
+      "github": "https://github.com",
+      "linkedin": "https://linkedin.com",
+      "twitter": "https://x.com",
+      "medium": "https://medium.com",
+      "website": "https://ahmetyilmaz.dev"
+    },
+    "stats": {
+      "yearsExperience": 6,
+      "completedProjects": 28,
+      "happyClients": 18,
+      "codeCommits": "2.4K+"
+    }
+  },
+  "about": {
+    "title": "Hakkımda",
+    "intro": "Kod yazmayı sadece bir meslek değil, problem çözme ve estetik yaratma sanatı olarak görüyorum.",
+    "paragraphs": [
+      "Bilgisayar Mühendisliği mezuniyetimin ardından Türkiye'nin önde gelen teknoloji şirketlerinde ve uluslararası uzaktan ekiplerde full-stack mühendis olarak görev aldım. Özellikle Node.js, TypeScript, React ve bulut altyapıları konusunda derinlemesine uzmanlığa sahibim.",
+      "Karmaşık iş problemlerini yalın, yüksek performanslı ve sürdürülebilir mimarilere dönüştürmekten keyif alıyorum. Boş zamanlarımda açık kaynak projelere katkıda bulunuyor ve yazılım topluluklarında mentorluk yapıyorum."
+    ],
+    "highlights": [
+      "Modern JavaScript / TypeScript, Node.js & React / Vue ekosistemi",
+      "Mikroservisler, RESTful & GraphQL API tasarımı ve optimizasyonu",
+      "PostgreSQL, MongoDB, Redis ve Docker / Kubernetes mimarileri",
+      "Yüksek trafikli sistemlerde performans optimizasyonu ve güvenlik",
+      "Agile / Scrum metodolojileri ve teknik ekip liderliği tecrübesi"
+    ]
+  },
+  "experiences": [
+    {
+      "id": "exp-1",
+      "title": "Kıdemli Full Stack Yazılım Mühendisi",
+      "company": "TechNova Bilişim Çözümleri",
+      "location": "İstanbul (Hibrit)",
+      "startDate": "2022-04",
+      "endDate": "Günümüz",
+      "current": true,
+      "description": "Büyük ölçekli B2B SaaS platformunun mikroservis mimarisine taşınması ve modern web arayüzünün sıfırdan geliştirilmesi süreçlerine liderlik ettim.",
+      "achievements": [
+        "Monolitik altyapıyı mikroservislere dönüştürerek API gecikme süresini %45 azalttık.",
+        "Aylık 2.5 milyondan fazla istek alan ödeme ve faturalandırma modülünü geliştirdim.",
+        "CI/CD süreçlerini otomatikleştirerek sürüm yayınlama süresini 4 saatten 15 dakikaya indirdik."
+      ],
+      "technologies": ["Node.js", "TypeScript", "React", "PostgreSQL", "Docker", "Redis", "AWS"]
+    },
+    {
+      "id": "exp-2",
+      "title": "Full Stack Web Geliştirici",
+      "company": "Artisan Dijital Ajans",
+      "location": "İstanbul (Ofis)",
+      "startDate": "2020-01",
+      "endDate": "2022-03",
+      "current": false,
+      "description": "Kurumsal müşteriler için özel e-ticaret siteleri, yönetim panelleri ve CRM entegrasyonları tasarladım ve geliştirdim.",
+      "achievements": [
+        "15'ten fazla kurumsal müşteri projesini başarıyla teslim ettik.",
+        "Özel tasarım sistemi ve UI bileşen kütüphanesi oluşturarak geliştirme hızını %35 artırdım."
+      ],
+      "technologies": ["JavaScript (ES6+)", "Vue.js", "Express.js", "MongoDB", "TailwindCSS"]
+    },
+    {
+      "id": "exp-3",
+      "title": "Frontend Geliştirici",
+      "company": "Piksel Yazılım Stüdyosu",
+      "location": "Ankara (Uzaktan)",
+      "startDate": "2018-09",
+      "endDate": "2019-12",
+      "current": false,
+      "description": "Mobil uyumlu, yüksek erişilebilirliğe sahip kullanıcı arayüzleri ve web uygulamaları geliştirdim.",
+      "achievements": [
+        "Google Lighthouse performans skorlarını 60 seviyesinden 95+ seviyesine yükselttim."
+      ],
+      "technologies": ["HTML5", "CSS3 / SASS", "JavaScript", "React", "Webpack"]
+    }
+  ],
+  "educations": [
+    {
+      "id": "edu-1",
+      "degree": "Lisans - Bilgisayar Mühendisliği",
+      "school": "İstanbul Teknik Üniversitesi (İTÜ)",
+      "startDate": "2014",
+      "endDate": "2018",
+      "description": "Yüksek Onur Derecesi (GPA: 3.74/4.00). Bitirme projesi: 'Dağıtık Sistemlerde Gerçek Zamanlı Veri İşleme'."
+    },
+    {
+      "id": "edu-2",
+      "degree": "Fen Lisesi Diploması",
+      "school": "Kadıköy Anadolu Lisesi",
+      "startDate": "2010",
+      "endDate": "2014",
+      "description": "Matematik ve Fen Bilimleri ağırlıklı eğitim."
+    }
+  ],
+  "skills": [
+    { "id": "sk-1", "category": "Backend", "name": "Node.js & Express", "level": 92, "icon": "server" },
+    { "id": "sk-2", "category": "Backend", "name": "TypeScript", "level": 90, "icon": "file-code" },
+    { "id": "sk-3", "category": "Backend", "name": "RESTful & GraphQL APIs", "level": 94, "icon": "network" },
+    { "id": "sk-4", "category": "Frontend", "name": "React & Next.js", "level": 90, "icon": "layout" },
+    { "id": "sk-5", "category": "Frontend", "name": "JavaScript (ES6+)", "level": 95, "icon": "code" },
+    { "id": "sk-6", "category": "Frontend", "name": "TailwindCSS & Modern UI", "level": 92, "icon": "palette" },
+    { "id": "sk-7", "category": "Veritabanı & Bulut", "name": "PostgreSQL & Prisma", "level": 88, "icon": "database" },
+    { "id": "sk-8", "category": "Veritabanı & Bulut", "name": "MongoDB", "level": 85, "icon": "database" },
+    { "id": "sk-9", "category": "Veritabanı & Bulut", "name": "Docker & Containerization", "level": 82, "icon": "box" },
+    { "id": "sk-10", "category": "Veritabanı & Bulut", "name": "AWS (S3, EC2, Lambda)", "level": 78, "icon": "cloud" },
+    { "id": "sk-11", "category": "Araçlar & Yöntemler", "name": "Git & GitHub CI/CD", "level": 92, "icon": "git-branch" },
+    { "id": "sk-12", "category": "Araçlar & Yöntemler", "name": "TDD & Jest / Vitest", "level": 84, "icon": "check-circle" }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "CloudMetrics - Gerçek Zamanlı Sunucu & API İzleme Paneli",
+      "category": "SaaS / Full Stack",
+      "summary": "Sunucu performans metriklerini, API gecikmelerini ve hata loglarını canlı olarak izleyen modern SaaS aracı.",
+      "description": "Dağıtık sunucuların CPU, bellek, disk ve ağ trafiğini saniyelik olarak toplayıp görselleştiren gösterge paneli. Kullanıcılar anlık alarmlar kurabilir ve Slack / E-posta bildirimleri alabilir.",
+      "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80",
+      "tags": ["Node.js", "React", "Socket.io", "PostgreSQL", "TailwindCSS"],
+      "demoUrl": "https://example.com/demo1",
+      "githubUrl": "https://github.com/example/cloudmetrics",
+      "featured": true,
+      "highlights": [
+        "WebSockets ile anlık canlı metrik akışı",
+        "Rol tabanlı yetkilendirme (RBAC) ve takım yönetimi",
+        "Özelleştirilebilir grafik panelleri ve metrik dışa aktarma"
+      ]
+    },
+    {
+      "id": "proj-2",
+      "title": "ShopNest - Headless E-Ticaret ve Sipariş Yönetim Sistemi",
+      "category": "E-Ticaret",
+      "summary": "Yüksek performanslı, headless mimariye sahip çok mağazalı e-ticaret platformu ve stok yönetim sistemi.",
+      "description": "Modern ödeme ağ geçitleri (Stripe, Iyzico) entegrasyonuna sahip, ultra hızlı ürün arama ve filtreleme sunan, mobil öncelikli e-ticaret çözümü.",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80",
+      "tags": ["Next.js", "Express.js", "Redis", "PostgreSQL", "Stripe"],
+      "demoUrl": "https://example.com/demo2",
+      "githubUrl": "https://github.com/example/shopnest",
+      "featured": true,
+      "highlights": [
+        "Redis önbellekleme ile 40ms altı ürün listeleme",
+        "Çoklu para birimi ve çoklu dil desteği",
+        "Kapsamlı sipariş, kargo ve iade takip modülü"
+      ]
+    },
+    {
+      "id": "proj-3",
+      "title": "DocuAI - Akıllı Doküman Özetleme ve Soru-Cevap Asistanı",
+      "category": "Yapay Zeka / Web",
+      "summary": "PDF ve dokümanları analiz edip semantik arama ve özetleme sunan yapay zeka destekli üretkenlik aracı.",
+      "description": "Kullanıcıların yüklediği PDF, DOCX ve metin dosyalarını vektör veritabanına indeksleyerek içerik hakkında doğal dilde soru-cevap yapmalarını sağlayan web uygulaması.",
+      "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=900&q=80",
+      "tags": ["TypeScript", "React", "Node.js", "Vector DB", "OpenAI API"],
+      "demoUrl": "https://example.com/demo3",
+      "githubUrl": "https://github.com/example/docuai",
+      "featured": true,
+      "highlights": [
+        "Vektör arama ile yüksek doğruluklu bağlamsal cevaplar",
+        "Sürükle-bırak dosya yükleme ve anlık sayfa önizleme",
+        "Dışa aktarılabilir özet raporları (PDF & Markdown)"
+      ]
+    },
+    {
+      "id": "proj-4",
+      "title": "TaskFlow - Takım Odaklı Kanban & Proje Yönetim Aracı",
+      "category": "Web Uygulaması",
+      "summary": "Yazılım ve tasarım ekipleri için sprint planlama, görev atama ve zaman takibi yapabilen minimalist arayüz.",
+      "description": "Sürükle-bırak Kanban panoları, zaman çizelgesi (Gantt) görünümleri ve detaylı sprint analizleri sunan modern takım işbirliği aracı.",
+      "image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=900&q=80",
+      "tags": ["Vue.js", "Node.js", "MongoDB", "TailwindCSS"],
+      "demoUrl": "https://example.com/demo4",
+      "githubUrl": "https://github.com/example/taskflow",
+      "featured": false,
+      "highlights": [
+        "Akıcı sürükle-bırak görev taşımaları",
+        "Otomatik iş akışı tetikleyicileri ve etiketleme"
+      ]
+    }
+  ],
+  "messages": [],
+  "security": {
+    "adminUsername": "admin",
+    "adminPasswordHash": "$2a$10$JOuT.Gu/0q9TdYYWQ1QWJeCqJsGghPXKGjxua/UWs7e6Nurbt1h1O"
+  }
+}

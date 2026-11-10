@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yönetim Paneli | CV & Portfolyo CMS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Özel Stiller -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen selection:bg-brand-500 selection:text-white bg-mesh antialiased">
+
+  <!-- Toast Bildirim Alanı -->
+  <div id="toast-container"></div>
+
+  <!-- GİRİŞ EKRANI (Varsayılan olarak oturum yoksa gösterilir) -->
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+      <!-- Arka plan parlama -->
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center mb-8">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-500/30">
+          <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Yönetim Paneli Girişi</h1>
+        <p class="text-xs text-slate-400 mt-2">CV ve portfolyonuzu düzenlemek için giriş yapın.</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Kullanıcı Adı</label>
+          <div class="relative">
+            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <input type="text" id="login-username" required value="admin" class="w-full bg-slate-900/90 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Şifre</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <input type="password" id="login-password" required value="admin123" class="w-full bg-slate-900/90 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+            <button type="button" id="toggle-password-btn" class="absolute right-3.5 top-3 text-slate-400 hover:text-white">
+              <i data-lucide="eye" class="w-4 h-4" id="toggle-eye-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-brand-500/10 border border-brand-500/20 text-[11px] text-brand-300 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 shrink-0 text-brand-400 mt-0.5"></i>
+          <span>Varsayılan bilgiler: Kullanıcı adı: <b>admin</b>, Şifre: <b>admin123</b> (Giriş yaptıktan sonra şifrenizi değiştirebilirsiniz).</span>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-500/25 transition">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Panele Giriş Yap</span>
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <a href="/" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Ana Sayfaya Geri Dön</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMİN YÖNETİM MERKEZİ (Oturum açıldığında gösterilir) -->
+  <div id="admin-view" class="hidden min-h-screen flex flex-col">
+    
+    <!-- Üst Bar (Admin Navbar) -->
+    <header class="sticky top-0 z-40 glass-nav border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-sm text-white">CV & Portfolyo Yönetimi</div>
+            <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Çevrimiçi (Admin)
+            </div>
+          </div>
+        </div>
+
+        <!-- Üst Butonlar -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span class="hidden sm:inline">Siteyi Görüntüle</span>
+          </a>
+
+          <a href="/print-cv" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span class="hidden sm:inline">CV Yazdır (PDF)</span>
+          </a>
+
+          <button id="logout-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Çıkış</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Ana Gövde: Sol Menü & Sağ İçerik -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col md:flex-row gap-8 w-full">
+      
+      <!-- Sol Sidebar Navigasyon -->
+      <aside class="w-full md:w-64 shrink-0 space-y-1">
+        <nav class="glass-card rounded-2xl p-2.5 space-y-1" id="admin-tabs">
+          <button class="admin-tab-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="overview">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Genel Bakış</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="profile">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            <span>Profil & İletişim</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="about">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Hakkımda & Odaklar</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="experiences">
+            <i data-lucide="briefcase" class="w-4 h-4"></i>
+            <span>Deneyimler</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="educations">
+            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+            <span>Eğitim Geçmişi</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="skills">
+            <i data-lucide="code-2" class="w-4 h-4"></i>
+            <span>Yetenekler</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="projects">
+            <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+            <span>Projeler & Çalışmalar</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="messages">
+            <div class="flex items-center gap-3">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              <span>Gelen Mesajlar</span>
+            </div>
+            <span id="unread-msg-badge" class="px-2 py-0.5 text-[10px] rounded-full bg-brand-500 text-white font-bold hidden">0</span>
+          </button>
+
+          <div class="pt-2 border-t border-white/5 my-1"></div>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="security">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            <span>Şifre & Güvenlik</span>
+          </button>
+
+          <button class="admin-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition" data-tab="backup">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span>Yedekleme & Geri Yükle</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Sağ Ana İçerik Alanı -->
+      <main class="flex-1 min-w-0">
+        
+        <!-- 1. TAB: GENEL BAKIŞ -->
+        <section id="tab-overview" class="tab-content space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white">Yönetim Paneli Özeti</h2>
+            <span class="text-xs text-slate-400" id="overview-last-update">Canlı Veri</span>
+          </div>
+
+          <!-- İstatistik Kartları -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-brand-500">
+              <div class="text-xs text-slate-400 font-medium">Toplam Proje</div>
+              <div class="text-2xl font-bold text-white mt-1" id="dash-stat-projects">0</div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-indigo-500">
+              <div class="text-xs text-slate-400 font-medium">Kayıtlı Deneyim</div>
+              <div class="text-2xl font-bold text-white mt-1" id="dash-stat-experiences">0</div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-emerald-500">
+              <div class="text-xs text-slate-400 font-medium">Teknik Yetenek</div>
+              <div class="text-2xl font-bold text-white mt-1" id="dash-stat-skills">0</div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-amber-500">
+              <div class="text-xs text-slate-400 font-medium">Gelen Mesajlar</div>
+              <div class="text-2xl font-bold text-white mt-1" id="dash-stat-messages">0</div>
+            </div>
+          </div>
+
+          <!-- Hızlı Kılavuz & İpuçları -->
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+              <span>Nasıl Kullanılır?</span>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-300">
+              <div class="p-4 rounded-xl bg-white/5 border border-white/5 space-y-1.5">
+                <div class="font-bold text-white flex items-center gap-2">
+                  <i data-lucide="edit-3" class="w-4 h-4 text-brand-400"></i> 1. Profilinizi Düzenleyin
+                </div>
+                <p class="text-slate-400">Adınız, unvanınız, sosyal medya hesaplarınız ve hakkımda yazılarınızı sol menüdeki Profil sekmesinden güncelleyin.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-white/5 border border-white/5 space-y-1.5">
+                <div class="font-bold text-white flex items-center gap-2">
+                  <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> 2. Çalışma & Proje Ekleyin
+                </div>
+                <p class="text-slate-400">Deneyimlerinizi ve yaptığınız projeleri ekran görüntüleri ve linklerle birlikte Projeler sekmesinden kolayca ekleyin.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-white/5 border border-white/5 space-y-1.5">
+                <div class="font-bold text-white flex items-center gap-2">
+                  <i data-lucide="printer" class="w-4 h-4 text-indigo-400"></i> 3. CV'nizi Yazdırın / İndirin
+                </div>
+                <p class="text-slate-400">Sayfanın üstündeki "CV Yazdır" butonuna tıklayarak kurumsal formatta PDF olarak kaydedebilir veya yazdırabilirsiniz.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Son Gelen Mesajlar Önizleme -->
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="inbox" class="w-5 h-5 text-brand-400"></i>
+                <span>Son Ziyaretçi Mesajları</span>
+              </h3>
+              <button onclick="switchTab('messages')" class="text-xs text-brand-400 hover:underline">Tümünü Gör →</button>
+            </div>
+            <div id="overview-recent-messages" class="space-y-2">
+              <!-- Mesajlar listesi -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. TAB: PROFİL & İLETİŞİM -->
+        <section id="tab-profile" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Profil & İletişim Bilgileri</h2>
+              <p class="text-xs text-slate-400 mt-1">Ana sayfada ve CV'nizde yer alan temel bilgilerinizi düzenleyin.</p>
+            </div>
+          </div>
+
+          <form id="profile-form" class="space-y-6">
+            <!-- Avatar Yükleme Alanı -->
+            <div class="glass-card rounded-2xl p-6">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Profil Fotoğrafı (Avatar)</label>
+              <div class="flex flex-col sm:flex-row items-center gap-6">
+                <img id="profile-avatar-preview" src="" alt="Avatar" class="w-24 h-24 rounded-2xl object-cover border-2 border-brand-500/40 bg-slate-800 shadow-lg">
+                <div class="flex-1 space-y-3 w-full">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Görsel URL'si</label>
+                    <input type="text" id="prof-avatar-url" placeholder="https://..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">veya Bilgisayardan Fotoğraf Yükle</label>
+                    <input type="file" id="avatar-file-input" accept="image/*" class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-500 cursor-pointer">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Temel Bilgiler -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Kişisel Bilgiler</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Adınız Soyadınız *</label>
+                  <input type="text" id="prof-name" required class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Mesleki Unvan *</label>
+                  <input type="text" id="prof-title" required class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">E-Posta Adresi *</label>
+                  <input type="email" id="prof-email" required class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Telefon Numarası</label>
+                  <input type="text" id="prof-phone" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Lokasyon (Şehir, Ülke)</label>
+                  <input type="text" id="prof-location" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Çalışma Durumu Rozeti</label>
+                  <input type="text" id="prof-status" placeholder="Örn: Yeni projelere açık" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Kısa Biyografi (Hero Alanı)</label>
+                <textarea id="prof-bio" rows="3" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 resize-none"></textarea>
+              </div>
+            </div>
+
+            <!-- Sosyal Medya Linkleri -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Sosyal Medya & Web Bağlantıları</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub Profili</label>
+                  <input type="text" id="prof-github" placeholder="https://github.com/..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">LinkedIn Profili</label>
+                  <input type="text" id="prof-linkedin" placeholder="https://linkedin.com/in/..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Twitter / X</label>
+                  <input type="text" id="prof-twitter" placeholder="https://x.com/..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Kişisel Web Sitesi</label>
+                  <input type="text" id="prof-website" placeholder="https://..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- İstatistik Sayaçları -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Hero Sayaç Rakamları</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Deneyim Yılı (Örn: 6+)</label>
+                  <input type="text" id="prof-stat-years" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Tamamlanan Proje Sayısı</label>
+                  <input type="text" id="prof-stat-projects" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">Mutlu Müşteri / İş Ortağı</label>
+                  <input type="text" id="prof-stat-clients" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-500/25 transition">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Profil Bilgilerini Kaydet</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- 3. TAB: HAKKIMDA -->
+        <section id="tab-about" class="tab-content hidden space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Hakkımda & Odak Alanları</h2>
+            <p class="text-xs text-slate-400 mt-1">Kendinizi tanıttığınız uzun açıklamalar ve vurgulanan yetkinlikler.</p>
+          </div>
+
+          <form id="about-form" class="space-y-6">
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Giriş Vurgu Cümlesi (Büyük Punto)</label>
+                <input type="text" id="about-intro" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Ayrıntılı Paragraflar (Her yeni paragraf için bir boşluk bırakın veya yeni satıra geçin)</label>
+                <textarea id="about-paragraphs" rows="6" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Temel Yetkinlik Maddeleri (Her satıra bir madde yazın)</label>
+                <textarea id="about-highlights" rows="5" placeholder="Her satıra 1 madde yazın..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 font-mono text-xs"></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-500/25 transition">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Hakkımda Bilgilerini Kaydet</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- 4. TAB: DENEYİMLER -->
+        <section id="tab-experiences" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">İş & Staj Deneyimleri</h2>
+              <p class="text-xs text-slate-400 mt-1">Çalıştığınız şirketler, pozisyonlarınız ve elde ettiğiniz başarılar.</p>
+            </div>
+            <button onclick="openExperienceModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Yeni Deneyim Ekle</span>
+            </button>
+          </div>
+
+          <div id="admin-experience-list" class="space-y-4">
+            <!-- Dinamik deneyim kartları -->
+          </div>
+        </section>
+
+        <!-- 5. TAB: EĞİTİM -->
+        <section id="tab-educations" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Eğitim & Akademik Geçmiş</h2>
+              <p class="text-xs text-slate-400 mt-1">Mezuniyetleriniz, okullarınız ve dereceleriniz.</p>
+            </div>
+            <button onclick="openEducationModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Yeni Eğitim Ekle</span>
+            </button>
+          </div>
+
+          <div id="admin-education-list" class="space-y-4">
+            <!-- Dinamik eğitim kartları -->
+          </div>
+        </section>
+
+        <!-- 6. TAB: YETENEKLER -->
+        <section id="tab-skills" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Teknik Yetenekler</h2>
+              <p class="text-xs text-slate-400 mt-1">Kullandığınız diller, araçlar, kütüphaneler ve seviyeleri.</p>
+            </div>
+            <button onclick="openSkillModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Yeni Yetenek Ekle</span>
+            </button>
+          </div>
+
+          <div id="admin-skills-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dinamik yetenek kartları -->
+          </div>
+        </section>
+
+        <!-- 7. TAB: PROJELER -->
+        <section id="tab-projects" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Projeler & Portfolyo</h2>
+              <p class="text-xs text-slate-400 mt-1">Geliştirdiğiniz projeler, web uygulamaları ve açık kaynak çalışmalarınız.</p>
+            </div>
+            <button onclick="openProjectEditModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Yeni Proje Ekle</span>
+            </button>
+          </div>
+
+          <div id="admin-projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Dinamik proje kartları -->
+          </div>
+        </section>
+
+        <!-- 8. TAB: GELEN MESAJLAR -->
+        <section id="tab-messages" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Gelen Kutusu (Ziyaretçi Mesajları)</h2>
+              <p class="text-xs text-slate-400 mt-1">İletişim formu aracılığıyla gönderilen mesajlar.</p>
+            </div>
+          </div>
+
+          <div id="admin-messages-list" class="space-y-4">
+            <!-- Dinamik mesaj listesi -->
+          </div>
+        </section>
+
+        <!-- 9. TAB: GÜVENLİK & ŞİFRE -->
+        <section id="tab-security" class="tab-content hidden space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Güvenlik & Şifre Değiştir</h2>
+            <p class="text-xs text-slate-400 mt-1">Yönetim paneline giriş bilgilerinizi güncelleyin.</p>
+          </div>
+
+          <form id="password-form" class="glass-card rounded-2xl p-6 max-w-lg space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Kullanıcı Adı (İsteğe Bağlı Değiştir)</label>
+              <input type="text" id="sec-username" value="admin" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Mevcut Şifre *</label>
+              <input type="password" id="sec-current-pass" required placeholder="Mevcut şifreniz (Varsayılan: admin123)" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Yeni Şifre * (En az 6 karakter)</label>
+              <input type="password" id="sec-new-pass" required minlength="6" placeholder="Yeni güçlü şifreniz" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+              <i data-lucide="key" class="w-4 h-4"></i>
+              <span>Şifreyi Güncelle</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- 10. TAB: YEDEKLEME & GERİ YÜKLEME -->
+        <section id="tab-backup" class="tab-content hidden space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Yedekleme & Geri Yükleme</h2>
+            <p class="text-xs text-slate-400 mt-1">Tüm verilerinizi tek tıkla JSON olarak indirin veya başka bir cihaza aktarın.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Dışa Aktarma -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+                <i data-lucide="download" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-base font-bold text-white">Verileri Dışa Aktar (Yedek İndir)</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Tüm profil bilgilerinizi, projelerinizi, deneyim ve yeteneklerinizi içeren tam JSON yedeğini bilgisayarınıza kaydedin.
+              </p>
+              <a href="/api/admin/export" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow transition">
+                <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                <span>Yedek Dosyasını İndir (.json)</span>
+              </a>
+            </div>
+
+            <!-- İçe Aktarma -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                <i data-lucide="upload" class="w-5 h-5"></i>
+              </div>
+              <h3 class="text-base font-bold text-white">Yedekten Geri Yükle</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Daha önce indirdiğiniz bir <code>cv-portfolio-backup.json</code> dosyasını seçerek tüm site içeriğini anında geri yükleyin.
+              </p>
+              <input type="file" id="backup-file-input" accept=".json" class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+              <button onclick="restoreBackupFile()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-purple-600 hover:bg-purple-500 shadow transition">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span>Yedeği Geri Yükle</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- MODALLAR (EKLEME / DÜZENLEME FORMLARI) -->
+  <!-- ==================================================== -->
+
+  <!-- DENEYİM MODALI -->
+  <div id="modal-experience" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card bg-[#0f172a] border border-white/15 rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" id="modal-exp-title">Yeni Deneyim Ekle</h3>
+        <button onclick="closeModal('modal-experience')" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="exp-form" class="space-y-4">
+        <input type="hidden" id="exp-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Pozisyon / Unvan *</label>
+          <input type="text" id="exp-pos" required placeholder="Örn: Senior Frontend Developer" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Şirket Adı *</label>
+            <input type="text" id="exp-comp" required placeholder="Örn: ABC Teknoloji" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Lokasyon</label>
+            <input type="text" id="exp-loc" placeholder="Örn: İstanbul (Hibrit)" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Başlangıç Tarihi *</label>
+            <input type="text" id="exp-start" required placeholder="Örn: 2022-03 veya 2022" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Bitiş Tarihi</label>
+            <input type="text" id="exp-end" placeholder="Örn: 2024-05" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="exp-current" class="w-4 h-4 rounded text-brand-600 bg-slate-900 border-white/20">
+          <label for="exp-current" class="text-xs font-medium text-slate-300 cursor-pointer">Şu anda burada çalışmaya devam ediyorum</label>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Açıklama / Görev Tanımı</label>
+          <textarea id="exp-desc" rows="3" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Elde Edilen Başarılar (Her satıra bir madde)</label>
+          <textarea id="exp-achievements" rows="3" placeholder="Örn: API gecikmesini %40 azalttım" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500 font-mono"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Kullanılan Teknolojiler (Virgülle ayırın)</label>
+          <input type="text" id="exp-techs" placeholder="React, Node.js, PostgreSQL, Docker" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeModal('modal-experience')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10">İptal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EĞİTİM MODALI -->
+  <div id="modal-education" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card bg-[#0f172a] border border-white/15 rounded-3xl max-w-lg w-full p-6 relative shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" id="modal-edu-title">Yeni Eğitim Ekle</h3>
+        <button onclick="closeModal('modal-education')" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="edu-form" class="space-y-4">
+        <input type="hidden" id="edu-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Bölüm / Derece *</label>
+          <input type="text" id="edu-degree" required placeholder="Örn: Lisans - Bilgisayar Mühendisliği" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Okul / Üniversite *</label>
+          <input type="text" id="edu-school" required placeholder="Örn: İstanbul Teknik Üniversitesi" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Başlangıç Yılı *</label>
+            <input type="text" id="edu-start" required placeholder="Örn: 2016" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Bitiş Yılı *</label>
+            <input type="text" id="edu-end" required placeholder="Örn: 2020 veya Günümüz" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Açıklama / Not Ortalaması</label>
+          <textarea id="edu-desc" rows="3" placeholder="Örn: 3.80 / 4.00 Onur Derecesi." class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeModal('modal-education')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10">İptal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- YETENEK MODALI -->
+  <div id="modal-skill" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card bg-[#0f172a] border border-white/15 rounded-3xl max-w-md w-full p-6 relative shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" id="modal-skill-title">Yeni Yetenek Ekle</h3>
+        <button onclick="closeModal('modal-skill')" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="skill-form" class="space-y-4">
+        <input type="hidden" id="skill-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Yetenek Adı *</label>
+          <input type="text" id="skill-name" required placeholder="Örn: TypeScript, React, Docker" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Kategori *</label>
+          <select id="skill-category" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+            <option value="Frontend">Frontend</option>
+            <option value="Backend">Backend</option>
+            <option value="Veritabanı & Bulut">Veritabanı & Bulut</option>
+            <option value="Araçlar & Yöntemler">Araçlar & Yöntemler</option>
+            <option value="Tasarım">Tasarım</option>
+            <option value="Diğer">Diğer</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-semibold text-slate-300 mb-1">
+            <span>Yetkinlik Seviyesi (%)</span>
+            <span id="skill-level-val" class="text-brand-400 font-mono">85%</span>
+          </div>
+          <input type="range" id="skill-level" min="10" max="100" value="85" class="w-full accent-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Lucide İkon Adı (İsteğe Bağlı)</label>
+          <input type="text" id="skill-icon" placeholder="code, server, layout, database, box..." value="code" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono text-xs">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeModal('modal-skill')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10">İptal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROJE MODALI -->
+  <div id="modal-project" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card bg-[#0f172a] border border-white/15 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" id="modal-proj-title">Yeni Proje Ekle</h3>
+        <button onclick="closeModal('modal-project')" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="project-form" class="space-y-4">
+        <input type="hidden" id="proj-id">
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Proje Başlığı *</label>
+          <input type="text" id="proj-title" required placeholder="Örn: E-Ticaret ve Ödeme Altyapısı" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kategori *</label>
+            <input type="text" id="proj-category" required placeholder="Örn: Full Stack, Mobil, SaaS, AI" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div class="flex items-center pt-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="proj-featured" class="w-4 h-4 rounded text-brand-600 bg-slate-900 border-white/20">
+              <span class="text-xs font-medium text-amber-300">Öne Çıkan Proje Olarak İşaretle ★</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Görsel Yükleme / URL -->
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-3">
+          <label class="block text-xs font-bold text-slate-300">Proje Ekran Görüntüsü / Görseli</label>
+          <div class="flex gap-4 items-center">
+            <img id="proj-img-preview" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=300&q=80" alt="Preview" class="w-20 h-14 rounded-lg object-cover bg-slate-800 border border-white/10 shrink-0">
+            <div class="flex-1 space-y-2">
+              <input type="text" id="proj-image" placeholder="Görsel URL'si (https://...)" class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+              <div class="flex items-center gap-2">
+                <input type="file" id="proj-file-input" accept="image/*" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-500 cursor-pointer">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Kısa Özet (Kart üzerinde görünür) *</label>
+          <input type="text" id="proj-summary" required placeholder="Projenin 1-2 cümlelik vurucu açıklaması" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Detaylı Açıklama</label>
+          <textarea id="proj-desc" rows="3" placeholder="Projenin amacı, mimarisi ve çözülen problemler..." class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Önemli Özellikler / Başarılar (Her satıra bir madde)</label>
+          <textarea id="proj-highlights" rows="3" placeholder="Örn: 100k+ kullanıcıya hizmet verdi&#10;Gerçek zamanlı bildirim altyapısı kuruldu" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500 font-mono"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Teknolojiler & Etiketler (Virgülle ayırın)</label>
+          <input type="text" id="proj-tags" placeholder="React, Node.js, MongoDB, TailwindCSS" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Canlı Demo URL'si</label>
+            <input type="text" id="proj-demourl" placeholder="https://..." class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub Depo URL'si</label>
+            <input type="text" id="proj-githuburl" placeholder="https://github.com/..." class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+          <button type="button" onclick="closeModal('modal-project')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10">İptal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Scripti -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>
