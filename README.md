@@ -93,7 +93,29 @@ Verileriniz `data/cv-data.json` dosyasında güvenle saklanır. Harici bir verit
 
 ---
 
-## 🚀 GitHub Üzerinden Otomatik Deploy (Canlıya Alma)
+## 🌐 Normal Hosting (cPanel / Plesk / PHP / Paylaşımlı Hosting) Kurulumu (Docker Gerekmez!)
+
+Eğer standart bir paylaşımlı hosting (cPanel, Plesk, Natro, Turhost, Güzel Hosting, GoDaddy, Hostinger vb.) kullanıyorsanız ve **Docker yoksa**, projeniz 2 farklı yöntemle doğrudan çalışabilir:
+
+### Yöntem A: Klasik PHP Hosting (Node.js Bile Olmayan En Basit Hostingler İçin)
+Projenin içine hazır bir **PHP API motoru** (`api/index.php`) ve `.htaccess` yapılandırması entegre edilmiştir.
+1. GitHub'daki veya bilgisayarınızdaki tüm proje dosyalarını bir `.zip` dosyası yapın (veya FTP ile bağlanın).
+2. Hostinginizin cPanel Dosya Yöneticisine (File Manager) girin.
+3. `public_html` klasörünün içine dosyaları çıkartın (yükleyin).
+4. `data/` klasörünün yazma izinlerinin (CHMOD 755 veya 777) açık olduğundan emin olun.
+5. **Bu kadar!** Siteniz ve yönetim paneliniz doğrudan alan adınızda (`siteniz.com`) Docker'sız ve Node.js'siz çalışır.
+
+### Yöntem B: cPanel "Setup Node.js App" ile Çalıştırma
+Birçok cPanel hostingde "Node.js Seçici" (Setup Node.js App) özelliği vardır:
+1. cPanel'e girip **"Setup Node.js App"** simgesine tıklayın.
+2. **"Create Application"** butonuna basın.
+3. **Application startup file** alanına `app.js` (veya `server.js`) yazın.
+4. **Application root** olarak dosya klasörünüzü seçin.
+5. **"Run NPM Install"** butonuna basarak paketleri kurun ve **"Start"** deyin.
+
+---
+
+## 🚀 Bulut Üzerinden Otomatik Deploy (Canlıya Alma)
 
 Bu proje GitHub ile tam entegre çalışacak şekilde yapılandırılmıştır. GitHub deponuza her `git push` yaptığınızda sitenizin otomatik olarak yayına girmesi için en popüler iki ücretsiz yöntem:
 
