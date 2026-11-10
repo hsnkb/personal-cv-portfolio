@@ -93,7 +93,30 @@ Verileriniz `data/cv-data.json` dosyasında güvenle saklanır. Harici bir verit
 
 ---
 
-## 🌐 Normal Hosting (cPanel / Plesk / PHP / Paylaşımlı Hosting) Kurulumu (Docker Gerekmez!)
+## 🚀 GitHub Actions ile Otomatik FTP Deploy (ArsCarDirect Mimarisi)
+
+Tıpkı **ArsCarDirect** projesinde olduğu gibi, `main` dalına her `git push` yaptığınızda siteniz otomatik olarak test edilir, derlenir ve FTP ile hostinginize (Plesk / cPanel / IIS) yüklenir.
+
+### 🔐 Gerekli GitHub Secret'ları
+GitHub reponuzda **Settings > Secrets and variables > Actions** sayfasına gidin ve **"New repository secret"** butonuna basarak şu secret'ları ekleyin:
+
+| Secret Adı | Açıklama | Örnek Değer |
+|------------|----------|-------------|
+| `FTP_SERVER` | Hosting FTP sunucu adresi *(workflow env'den de ayarlanabilir)* | `ftp.alanadiniz.com` |
+| `FTP_USERNAME` | FTP kullanıcı adınız | `u12345678` veya `admin@alanadiniz.com` |
+| `FTP_PASSWORD` | FTP parolanız | `SuperGizliSifre123!` |
+| `FTP_DIR` | Sunucudaki hedef klasör *(opsiyonel)* | Plesk için `/httpdocs/`, cPanel için `/public_html/` *(varsayılan: `/httpdocs/`)* |
+
+### 🛠️ Deploy Akışı Nasıl Çalışır?
+1. **Doğrulama:** Node.js ortamı hazırlanır ve `server.js` sözdizimi kontrol edilir.
+2. **Paketleme (Publish):** Yalnızca canlı sitede çalışması gereken dosyalar (`public/`, `api/`, `data/`, `.htaccess`, `server.js`, `app.js`, `package.json`) `publish` klasörüne toplanır. `.git`, `.github`, `node_modules` gibi gereksiz dosyalar sunucuya asla gönderilmez.
+3. **Geçici Bakım Modu:** Yükleme başlamadan önce sunucuya `app_offline.htm` yüklenerek ziyaretçilere şık bir güncelleme mesajı gösterilir.
+4. **Hızlı & Güvenli FTP Senkronizasyonu (`SamKirkland/FTP-Deploy-Action@v4.3.5`):** Yalnızca değişen dosyalar aktarılır. Panelden yüklenen profil fotoğrafları ve proje ekran görüntüleri (`public/uploads/**`) ile loglar **kesinlikle korunur, silinmez veya ezilmez**.
+5. **Siteyi Tekrar Açma:** Yükleme tamamlandığında `app_offline.htm` otomatik silinir ve site anında canlıya döner.
+
+---
+
+## 🌐 Normal Hosting (cPanel / Plesk / PHP / Paylaşımlı Hosting) Manuel Kurulumu (Docker Gerekmez!)
 
 Eğer standart bir paylaşımlı hosting (cPanel, Plesk, Natro, Turhost, Güzel Hosting, GoDaddy, Hostinger vb.) kullanıyorsanız ve **Docker yoksa**, projeniz 2 farklı yöntemle doğrudan çalışabilir:
 

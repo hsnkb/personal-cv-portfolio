@@ -1,57 +1,103 @@
-name: Otomatik Test ve Deploy
+# main dalina her push'ta projeyi hazirlar ve FTP ile sunucuya (Plesk / cPanel / IIS) yukler.
+# ArsCarDirect projesindeki deploy ayarlari ve mimarisi ile birebir aynidir:
+#   - Windows runner uzerinde calisir
+#   - Node.js bagimliliklarini kurup server.js soz dizimini dogrular
+#   - Dagitim dosyalarini (api, data, public, .htaccess, node dosyalari) publish klasorune derler
+#   - Yukleme sirasinda 'app_offline.htm' ile siteyi bakima alir (Plesk/IIS ve Apache destekli)
+#   - SamKirkland/FTP-Deploy-Action@v4.3.5 ile sadece degisen dosyalari sunucuya aktarir
+#   - Sunucuda kullanicinin yukledigi resimleri (public/uploads/) korur, asla silmez/ezmez
+#   - Islem tamamlandiginda 'app_offline.htm' dosyasini silerek siteyi tekrar yayina acar
+#
+# Gerekli GitHub Secret'lari (GitHub Deposu > Settings > Secrets and variables > Actions):
+#   FTP_SERVER          FTP sunucu adresi (Orn: ftp.alanadiniz.com) - dilerseniz asagidaki env'den de belirtebilirsiniz
+#   FTP_USERNAME        FTP kullanici adi
+#   FTP_PASSWORD        FTP sifresi
+#   FTP_DIR             Sunucudaki hedef klasor (Plesk icin /httpdocs/, cPanel icin /public_html/) [Varsayilan: /httpdocs/]
+
+name: Deploy to Production via FTP
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [main]
   workflow_dispatch:
 
-jobs:
-  test-and-verify:
-    name: 🧪 Doğrulama ve Test
-    runs-on: ubuntu-latest
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
+env:
+  FTP_SERVER: ${{ secrets.FTP_SERVER || 'ftp.alanadiniz.com' }}
+  FTP_DIR: ${{ secrets.FTP_DIR || '/httpdocs/' }}
+
+jobs:
+  deploy:
+    runs-on: windows-latest
     steps:
-      - name: 📥 Depoyu Klonla (Checkout)
+      - name: Depoyu Klonla (Checkout)
         uses: actions/checkout@v4
 
-      - name: ⚙️ Node.js Kur
+      - name: Node.js Kur
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: 📦 Bağımlılıkları Yükle
-        run: npm ci
-
-      - name: 🔍 Kod Sözdizimi Kontrolü (Syntax Check)
-        run: node -c server.js
-
-      - name: 🚀 Duman Testi (Sunucu Başlatma & API Testi)
+      - name: Bagimliliklari Yukle ve Dogrula
         run: |
-          node server.js &
-          SERVER_PID=$!
-          sleep 3
-          curl --fail http://localhost:3000/api/cv || exit 1
-          echo "API ve Sunucu Başarıyla Doğrulandı!"
-          kill $SERVER_PID
+          npm ci
+          node -c server.js
 
-  trigger-deploy:
-    name: 🚀 Otomatik Deploy Tetikleme
-    needs: test-and-verify
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+      - name: Dagitim Dosyalarini Hazirla (Publish)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path publish | Out-Null
+          Copy-Item -Path "api" -Destination "publish/api" -Recurse -Force
+          Copy-Item -Path "data" -Destination "publish/data" -Recurse -Force
+          Copy-Item -Path "public" -Destination "publish/public" -Recurse -Force
+          Copy-Item -Path ".htaccess" -Destination "publish/.htaccess" -Force
+          Copy-Item -Path "server.js" -Destination "publish/server.js" -Force
+          Copy-Item -Path "app.js" -Destination "publish/app.js" -Force
+          Copy-Item -Path "package.json" -Destination "publish/package.json" -Force
+          Copy-Item -Path "package-lock.json" -Destination "publish/package-lock.json" -Force
+          Write-Host "Publish klasoru basariyla hazirlandi."
 
-    steps:
-      - name: 🌐 Deploy Hook Çağrısı (Render / Özel Webhook)
+      - name: Siteyi bakima al (app_offline.htm)
+        shell: pwsh
         env:
-          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          if [ -n "$DEPLOY_HOOK" ]; then
-            echo "Deploy Webhook tetikleniyor..."
-            curl -X POST "$DEPLOY_HOOK"
-            echo "Deploy başarıyla tetiklendi!"
-          else
-            echo "Bilgi: RENDER_DEPLOY_HOOK tanımlanmadı. Render.com veya Railway doğrudan GitHub bağlantısı ile otomatik deploy yapacaktır."
-          fi
+          if ([string]::IsNullOrWhiteSpace($env:FTP_USERNAME) -or [string]::IsNullOrWhiteSpace($env:FTP_PASSWORD)) {
+            throw "FTP_USERNAME veya FTP_PASSWORD secret'i tanimli degil. Lutfen GitHub Repository Settings > Secrets and variables > Actions bolumunden ekleyin."
+          }
+          Set-Content app_offline.htm '<!doctype html><meta charset="utf-8"><title>Guncelleniyor</title><p style="font-family:sans-serif;text-align:center;margin-top:20vh;color:#333;font-size:18px;">Site kisa bir sure icin guncelleniyor, lutfen birazdan tekrar deneyin.</p>'
+          curl.exe --fail --silent --show-error --ftp-pasv -T app_offline.htm --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)"
+          Start-Sleep -Seconds 5
+
+      - name: FTP ile yukle
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ env.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: ${{ env.FTP_DIR }}
+          # Sunucudaki dosyalar silinmez; sadece degisen dosyalar yuklenir.
+          # Admin panelinden yuklenen gorseller ve loglar hic ellenmez.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            public/uploads/**
+            logs/**
+            app_offline.htm
+
+      - name: Siteyi tekrar ac
+        if: always()
+        shell: pwsh
+        env:
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          if (-not [string]::IsNullOrWhiteSpace($env:FTP_USERNAME) -and -not [string]::IsNullOrWhiteSpace($env:FTP_PASSWORD)) {
+            curl.exe --fail --silent --show-error --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)" -Q "DELE $($env:FTP_DIR)app_offline.htm"
+          }

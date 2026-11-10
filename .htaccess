@@ -5,6 +5,11 @@
 RewriteEngine On
 RewriteBase /
 
+# 0. Bakım Modu (Deploy esnasında app_offline.htm varsa doğrudan onu göster)
+RewriteCond %{REQUEST_URI} !^/app_offline\.htm$
+RewriteCond %{DOCUMENT_ROOT}/app_offline.htm -f
+RewriteRule ^(.*)$ /app_offline.htm [L]
+
 # 1. Güvenlik: Veri dosyasına (data/cv-data.json) doğrudan tarayıcıdan erişimi engelle
 RewriteRule ^data/ - [F,L]
 
