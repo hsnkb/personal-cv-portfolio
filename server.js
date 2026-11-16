@@ -228,7 +228,7 @@ app.get('/api/auth/check', (req, res) => {
 // -------------------------------------------------------------
 
 // Tüm yönetim verisini getir (istatistikler, mesajlar dahil)
-app.get('/api/admin/data', requireAuth, (req, res) => {
+app.get(['/api/admin/data', '/api/admin/dashboard'], requireAuth, (req, res) => {
   const data = readData();
   if (!data) return res.status(500).json({ success: false, message: 'Veri okunamadı.' });
 

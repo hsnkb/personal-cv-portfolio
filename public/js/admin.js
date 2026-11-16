@@ -290,7 +290,7 @@ async function uploadImageFile(file, onSuccess) {
 // Yönetim Verisini Çekme
 async function fetchAdminData() {
   try {
-    const res = await fetch('/api/admin/data');
+    const res = await fetch('/api/admin/dashboard');
     const result = await res.json();
     if (result.success && result.data) {
       adminData = result.data;

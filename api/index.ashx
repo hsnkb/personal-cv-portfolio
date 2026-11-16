@@ -12,6 +12,7 @@ using System.Web.Script.Serialization;
 public class CvApiHandler : IHttpHandler
 {
     private static readonly object FileLock = new object();
+    private static Dictionary<string, object> MemoryCache = null;
     private const string SecretKey = "personal-cv-secret-key-2026-safe-token";
     private const string DefaultBcryptHash = "$2a$10$JOuT.Gu/0q9TdYYWQ1QWJeCqJsGghPXKGjxua/UWs7e6Nurbt1h1O";
 
@@ -47,6 +48,8 @@ public class CvApiHandler : IHttpHandler
 
         string baseDir = context.Server.MapPath("~/");
         string dataFile = Path.Combine(baseDir, "data", "cv-data.json");
+        string appDataDir = Path.Combine(baseDir, "App_Data");
+        string appDataFile = Path.Combine(appDataDir, "cv-data.json");
         string uploadsDir = Path.Combine(baseDir, "public", "uploads");
 
         if (!Directory.Exists(uploadsDir))
@@ -91,7 +94,7 @@ public class CvApiHandler : IHttpHandler
             }
         }
 
-        Dictionary<string, object> data = ReadData(dataFile, serializer);
+        Dictionary<string, object> data = ReadData(dataFile, appDataFile, serializer);
         if (data == null)
         {
             WriteJson(res, serializer, new Dictionary<string, object> {
@@ -238,8 +241,8 @@ public class CvApiHandler : IHttpHandler
             return;
         }
 
-        // GET /api/admin/data
-        if (route.Equals("admin/data", StringComparison.OrdinalIgnoreCase) && method == "GET")
+        // GET /api/admin/data or /api/admin/dashboard
+        if ((route.Equals("admin/data", StringComparison.OrdinalIgnoreCase) || route.Equals("admin/dashboard", StringComparison.OrdinalIgnoreCase)) && method == "GET")
         {
             var sec = GetDict(data, "security");
             var safeData = new Dictionary<string, object> {
@@ -721,37 +724,68 @@ public class CvApiHandler : IHttpHandler
         return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
     }
 
-    private static Dictionary<string, object> ReadData(string file, JavaScriptSerializer serializer)
+    private static Dictionary<string, object> ReadData(string file, string appDataFile, JavaScriptSerializer serializer)
     {
-        try
+        lock (FileLock)
         {
-            lock (FileLock)
+            if (MemoryCache != null)
+                return MemoryCache;
+
+            try
             {
-                if (!File.Exists(file)) return null;
-                string raw = File.ReadAllText(file, Encoding.UTF8);
-                return serializer.DeserializeObject(raw) as Dictionary<string, object>;
+                if (File.Exists(appDataFile) && File.Exists(file))
+                {
+                    if (File.GetLastWriteTimeUtc(appDataFile) >= File.GetLastWriteTimeUtc(file))
+                    {
+                        string rawApp = File.ReadAllText(appDataFile, Encoding.UTF8);
+                        var parsedApp = serializer.DeserializeObject(rawApp) as Dictionary<string, object>;
+                        if (parsedApp != null) { MemoryCache = parsedApp; return MemoryCache; }
+                    }
+                }
+                if (File.Exists(file))
+                {
+                    string raw = File.ReadAllText(file, Encoding.UTF8);
+                    var parsed = serializer.DeserializeObject(raw) as Dictionary<string, object>;
+                    if (parsed != null) { MemoryCache = parsed; return MemoryCache; }
+                }
+                if (File.Exists(appDataFile))
+                {
+                    string rawApp = File.ReadAllText(appDataFile, Encoding.UTF8);
+                    var parsedApp = serializer.DeserializeObject(rawApp) as Dictionary<string, object>;
+                    if (parsedApp != null) { MemoryCache = parsedApp; return MemoryCache; }
+                }
             }
-        }
-        catch
-        {
+            catch { }
             return null;
         }
     }
 
     private static bool SaveData(string file, JavaScriptSerializer serializer, Dictionary<string, object> data)
     {
-        try
+        lock (FileLock)
         {
-            lock (FileLock)
+            MemoryCache = data;
+            string json = serializer.Serialize(data);
+            bool saved = false;
+            try
             {
-                string json = serializer.Serialize(data);
                 File.WriteAllText(file, json, new UTF8Encoding(false));
-                return true;
+                saved = true;
             }
-        }
-        catch
-        {
-            return false;
+            catch { }
+
+            try
+            {
+                string baseDir = Path.GetDirectoryName(Path.GetDirectoryName(file));
+                string appDataDir = Path.Combine(baseDir, "App_Data");
+                if (!Directory.Exists(appDataDir)) Directory.CreateDirectory(appDataDir);
+                string appDataFile = Path.Combine(appDataDir, "cv-data.json");
+                File.WriteAllText(appDataFile, json, new UTF8Encoding(false));
+                saved = true;
+            }
+            catch { }
+
+            return saved;
         }
     }
 

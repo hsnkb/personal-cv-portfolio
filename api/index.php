@@ -194,8 +194,8 @@ if ($route === 'auth/check' && $method === 'GET') {
 // YÖNETİM PANELİ KORUMALI ROTALAR
 // -------------------------------------------------------------
 
-// GET /api/admin/data
-if ($route === 'admin/data' && $method === 'GET') {
+// GET /api/admin/data or /api/admin/dashboard
+if (($route === 'admin/data' || $route === 'admin/dashboard') && $method === 'GET') {
     requireAuth();
     jsonResponse([
         'success' => true,
