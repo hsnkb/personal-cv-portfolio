@@ -109,12 +109,12 @@ jobs:
             curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "RMD $($ftpDir)bin" | Out-Null
           }
 
-          # 2. Sunucuda canli data/cv-data.json var mi kontrol et (varsa ezme, yoksa ilk kurulum icin yukle)
+          # 2. Sunucuda canli data/cv-data.json var mi ve varsayilan "Ahmet Yilmaz" degil mi kontrol et
           $remoteDataExists = $false
-          curl.exe --fail --silent --ftp-pasv -I --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)data/cv-data.json" | Out-Null
-          if ($LASTEXITCODE -eq 0) {
+          $remoteJson = curl.exe --fail --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)data/cv-data.json"
+          if ($LASTEXITCODE -eq 0 -and $remoteJson -and ($remoteJson -join "`n") -notmatch 'Ahmet') {
             $remoteDataExists = $true
-            Write-Host "Sunucuda mevcut data/cv-data.json bulundu, canli veriler korunacak."
+            Write-Host "Sunucuda ozellestirilmis data/cv-data.json bulundu, canli veriler korunacak."
           }
 
           # 3. Publish klasorundeki dosyalari FTP'ye aktar
