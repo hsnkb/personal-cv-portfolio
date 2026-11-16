@@ -1,6 +1,25 @@
 // Admin Panel JavaScript Yönetim Motoru
 let adminData = null;
 
+// IIS / Plesk paylaşımlı hostinglerde PUT, DELETE, PATCH engellerini (405 Method Not Allowed) aşmak için
+const _nativeFetch = window.fetch.bind(window);
+window.fetch = function (input, init = {}) {
+  if (typeof input === 'string' && input.startsWith('/api/') && init && init.method) {
+    const m = String(init.method).toUpperCase();
+    if (m === 'PUT' || m === 'DELETE' || m === 'PATCH') {
+      const headers = new Headers(init.headers || {});
+      headers.set('X-HTTP-Method-Override', m);
+      const sep = input.includes('?') ? '&' : '?';
+      return _nativeFetch(`${input}${sep}_method=${m}`, {
+        ...init,
+        method: 'POST',
+        headers
+      });
+    }
+  }
+  return _nativeFetch(input, init);
+};
+
 // Toast Bildirimi Gösterme
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');

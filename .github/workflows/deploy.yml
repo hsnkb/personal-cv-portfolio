@@ -1,22 +1,11 @@
-# main dalina her push'ta projeyi hazirlar ve FTP ile sunucuya (Plesk / cPanel / IIS) yukler.
-# ArsCarDirect projesindeki deploy mimarisi esas alinarak yapilandirilmistir:
+# main dalina her push'ta projeyi hazirlar ve FTP ile sunucuya (Plesk / IIS / cPanel) yukler.
 #   - Windows runner uzerinde calisir
 #   - Node.js bagimliliklarini kurup server.js soz dizimini dogrular
-#   - Dagitim dosyalarini (api, data, public, .htaccess, node dosyalari) publish klasorune derler
+#   - Dagitim dosyalarini (api, data, public, web.config, .htaccess, node dosyalari) publish klasorune derler
 #   - Yukleme sirasinda 'app_offline.htm' ile siteyi bakima alir (Plesk/IIS ve Apache destekli)
-#   - SamKirkland/FTP-Deploy-Action@v4.3.5 ile FTPS/TLS uzerinden sadece degisen dosyalari aktarir
-#   - Sunucuda kullanicinin yukledigi resimleri (public/uploads/) korur, asla silmez/ezmez
+#   - Microsoft FTP Service (IIS) ile tam uyumlu curl.exe (PASV) uzerinden tum dosyalari hatasiz aktarir
+#   - Sunucuda kullanicinin yukledigi resimleri (public/uploads/) ve canli veriyi korur
 #   - Islem tamamlandiginda 'app_offline.htm' dosyasini silerek siteyi tekrar yayina acar
-#
-# Gerekli GitHub Secret'lari (GitHub Deposu > Settings > Secrets and variables > Actions):
-#   FTP_SERVER          FTP sunucu adresi (Orn: ftp.alanadiniz.com)
-#   FTP_USERNAME        FTP kullanici adi
-#   FTP_PASSWORD        FTP sifresi
-#   FTP_DIR             Sunucudaki hedef klasor:
-#                         * Plesk ana hesabi icin: /httpdocs/
-#                         * cPanel ana hesabi icin: /public_html/
-#                         * Dogrudan site klasorune tanimli FTP kullanicisi icin: ./
-#   FTP_PROTOCOL        (Opsiyonel) 'ftps' (varsayilan, onerilen) veya 'ftp' (duz baglanti)
 
 name: Deploy to Production via FTP
 
@@ -30,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FTP_SERVER: ${{ secrets.FTP_SERVER || 'ftp.alanadiniz.com' }}
+  FTP_SERVER: ${{ secrets.FTP_SERVER || 'ftp.hasankaba.com.tr' }}
   FTP_DIR: ${{ secrets.FTP_DIR || '/httpdocs/' }}
 
 jobs:
@@ -58,6 +47,7 @@ jobs:
           Copy-Item -Path "api" -Destination "publish/api" -Recurse -Force
           Copy-Item -Path "data" -Destination "publish/data" -Recurse -Force
           Copy-Item -Path "public" -Destination "publish/public" -Recurse -Force
+          Copy-Item -Path "web.config" -Destination "publish/web.config" -Force
           Copy-Item -Path ".htaccess" -Destination "publish/.htaccess" -Force
           Copy-Item -Path "server.js" -Destination "publish/server.js" -Force
           Copy-Item -Path "app.js" -Destination "publish/app.js" -Force
@@ -74,34 +64,86 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:FTP_USERNAME) -or [string]::IsNullOrWhiteSpace($env:FTP_PASSWORD)) {
             throw "FTP_USERNAME veya FTP_PASSWORD secret'i tanimli degil. Lutfen GitHub Repository Settings > Secrets and variables > Actions bolumunden ekleyin."
           }
-          Set-Content app_offline.htm '<!doctype html><meta charset="utf-8"><title>Guncelleniyor</title><p style="font-family:sans-serif;text-align:center;margin-top:20vh;color:#333;font-size:18px;">Site kisa bir sure icin guncelleniyor, lutfen birazdan tekrar deneyin.</p>'
-          try {
-            curl.exe --silent --show-error --ftp-pasv --insecure -T app_offline.htm --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)"
-          } catch {
-            Write-Warning "app_offline.htm yuklenemedi, deploy adimina geciliyor."
+          $server = $env:FTP_SERVER.Trim() -replace '^ftps?://', '' -replace '/+$', ''
+          if ([string]::IsNullOrWhiteSpace($server) -or $server -eq 'ftp.alanadiniz.com') {
+            $server = 'ftp.hasankaba.com.tr'
           }
-          Start-Sleep -Seconds 3
+          $ftpDir = $env:FTP_DIR.Trim()
+          if ([string]::IsNullOrWhiteSpace($ftpDir)) { $ftpDir = '/httpdocs/' }
+          if (-not $ftpDir.StartsWith('/')) { $ftpDir = '/' + $ftpDir }
+          if (-not $ftpDir.EndsWith('/')) { $ftpDir = $ftpDir + '/' }
+
+          Set-Content app_offline.htm '<!doctype html><meta charset="utf-8"><title>Guncelleniyor</title><p style="font-family:sans-serif;text-align:center;margin-top:20vh;color:#333;font-size:18px;">Site kisa bir sure icin guncelleniyor, lutfen birazdan tekrar deneyin.</p>'
+          curl.exe --fail --silent --show-error --ftp-pasv -T app_offline.htm --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir"
+          Start-Sleep -Seconds 5
 
       - name: FTP ile yukle
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ env.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ secrets.FTP_PROTOCOL || 'ftps' }}
-          security: loose
-          timeout: 180000
-          log-level: verbose
-          local-dir: ./publish/
-          server-dir: ${{ env.FTP_DIR }}
-          # Sunucudaki dosyalar silinmez; sadece degisen dosyalar yuklenir.
-          # Admin panelinden yuklenen gorseller ve loglar hic ellenmez.
-          exclude: |
-            **/.git*
-            **/.git*/**
-            public/uploads/**
-            logs/**
-            app_offline.htm
+        shell: pwsh
+        env:
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          $server = $env:FTP_SERVER.Trim() -replace '^ftps?://', '' -replace '/+$', ''
+          if ([string]::IsNullOrWhiteSpace($server) -or $server -eq 'ftp.alanadiniz.com') {
+            $server = 'ftp.hasankaba.com.tr'
+          }
+          $ftpDir = $env:FTP_DIR.Trim()
+          if ([string]::IsNullOrWhiteSpace($ftpDir)) { $ftpDir = '/httpdocs/' }
+          if (-not $ftpDir.StartsWith('/')) { $ftpDir = '/' + $ftpDir }
+          if (-not $ftpDir.EndsWith('/')) { $ftpDir = $ftpDir + '/' }
+
+          # 1. Sunucuda eski ASP.NET (MvcProjeKampi vb.) kalintilari varsa temizle (Global.asax ve bin/*.dll IIS'i kilitler)
+          Write-Host "Eski ASP.NET kalintilari kontrol ediliyor..."
+          curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "DELE $($ftpDir)Global.asax" | Out-Null
+          curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "DELE $($ftpDir)Web.config" | Out-Null
+
+          $binFiles = curl.exe --silent --ftp-pasv --list-only --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)bin/"
+          if ($LASTEXITCODE -eq 0 -and $binFiles) {
+            foreach ($bf in ($binFiles -split "`r?`n" | Where-Object { $_ -and $_ -notmatch '^\.' })) {
+              $cleanName = $bf.Trim()
+              if ($cleanName) {
+                Write-Host "Eski bin dosyasi siliniyor: bin/$cleanName"
+                curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "DELE $($ftpDir)bin/$cleanName" | Out-Null
+              }
+            }
+            curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "RMD $($ftpDir)bin" | Out-Null
+          }
+
+          # 2. Sunucuda canli data/cv-data.json var mi kontrol et (varsa ezme, yoksa ilk kurulum icin yukle)
+          $remoteDataExists = $false
+          curl.exe --fail --silent --ftp-pasv -I --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)data/cv-data.json" | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            $remoteDataExists = $true
+            Write-Host "Sunucuda mevcut data/cv-data.json bulundu, canli veriler korunacak."
+          }
+
+          # 3. Publish klasorundeki dosyalari FTP'ye aktar
+          $publishRoot = (Resolve-Path "./publish").Path
+          $files = Get-ChildItem -Path $publishRoot -Recurse -File
+
+          foreach ($file in $files) {
+            $relPath = $file.FullName.Substring($publishRoot.Length).TrimStart('\', '/') -replace '\\', '/'
+
+            # Kullanicinin yukledigi gorselleri (public/uploads/) atla (.gitkeep haric klasor olusumu icin)
+            if ($relPath -like 'public/uploads/*' -and $file.Name -ne '.gitkeep') {
+              continue
+            }
+
+            # Sunucuda zaten cv-data.json varsa uzerine yazma
+            if ($relPath -eq 'data/cv-data.json' -and $remoteDataExists) {
+              Write-Host "Atlandi (canli veri korundu): $relPath"
+              continue
+            }
+
+            $remoteUrl = "ftp://$server$ftpDir$relPath"
+            Write-Host "Yukleniyor: $relPath -> $remoteUrl"
+            curl.exe --fail --silent --show-error --ftp-create-dirs --ftp-pasv --retry 3 --retry-delay 2 -T "$($file.FullName)" --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "$remoteUrl"
+            if ($LASTEXITCODE -ne 0) {
+              throw "Dosya yuklenemedi: $relPath"
+            }
+          }
+
+          Write-Host "Tum dosyalar basariyla FTP sunucusuna yuklendi!"
 
       - name: Siteyi tekrar ac
         if: always()
@@ -111,5 +153,14 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           if (-not [string]::IsNullOrWhiteSpace($env:FTP_USERNAME) -and -not [string]::IsNullOrWhiteSpace($env:FTP_PASSWORD)) {
-            curl.exe --silent --show-error --ftp-pasv --insecure --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$($env:FTP_SERVER)$($env:FTP_DIR)" -Q "DELE $($env:FTP_DIR)app_offline.htm"
+            $server = $env:FTP_SERVER.Trim() -replace '^ftps?://', '' -replace '/+$', ''
+            if ([string]::IsNullOrWhiteSpace($server) -or $server -eq 'ftp.alanadiniz.com') {
+              $server = 'ftp.hasankaba.com.tr'
+            }
+            $ftpDir = $env:FTP_DIR.Trim()
+            if ([string]::IsNullOrWhiteSpace($ftpDir)) { $ftpDir = '/httpdocs/' }
+            if (-not $ftpDir.StartsWith('/')) { $ftpDir = '/' + $ftpDir }
+            if (-not $ftpDir.EndsWith('/')) { $ftpDir = $ftpDir + '/' }
+
+            curl.exe --silent --show-error --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "DELE $($ftpDir)app_offline.htm"
           }

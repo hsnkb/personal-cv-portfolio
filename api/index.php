@@ -4,14 +4,23 @@
  * Node.js veya Docker gerektirmeyen doğrudan PHP REST API arka ucu.
  */
 
-session_start();
+error_reporting(0);
+ini_set('display_errors', '0');
+@session_start();
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override');
 
-$method = $_SERVER['REQUEST_METHOD'];
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+if ($method === 'POST') {
+    if (!empty($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+        $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+    } elseif (!empty($_GET['_method'])) {
+        $method = strtoupper($_GET['_method']);
+    }
+}
 
 // Preflight CORS isteklerini yanıtla
 if ($method === 'OPTIONS') {
@@ -56,15 +65,33 @@ function jsonResponse($data, $code = 200) {
     exit;
 }
 
-function requireAuth() {
-    if (empty($_SESSION['admin_auth'])) {
-        jsonResponse(['success' => false, 'message' => 'Yetkisiz erişim. Lütfen giriş yapın.'], 401);
+function getExpectedToken($data) {
+    $user = $data['security']['adminUsername'] ?? 'admin';
+    $hash = $data['security']['adminPasswordHash'] ?? 'default';
+    return hash_hmac('sha256', $user . '|' . $hash, 'personal-cv-secret-key-2026-safe-token');
+}
+
+function isAuthenticated($data) {
+    if (!empty($_SESSION['admin_auth'])) {
+        return true;
     }
+    $cookieToken = $_COOKIE['auth_token'] ?? '';
+    if (!empty($cookieToken) && hash_equals(getExpectedToken($data), $cookieToken)) {
+        return true;
+    }
+    return false;
 }
 
 $data = readData($dataFile);
 if (!$data) {
     jsonResponse(['success' => false, 'message' => 'Veri tabanı okunamadı.'], 500);
+}
+
+function requireAuth() {
+    global $data;
+    if (!isAuthenticated($data)) {
+        jsonResponse(['success' => false, 'message' => 'Yetkisiz erişim. Lütfen giriş yapın.'], 401);
+    }
 }
 
 // -------------------------------------------------------------
@@ -135,13 +162,13 @@ if ($route === 'auth/login' && $method === 'POST') {
         $_SESSION['admin_auth'] = true;
         $_SESSION['admin_username'] = $adminUser;
 
-        // Cookie de ayarla
-        setcookie('auth_token', 'php-sess-' . session_id(), time() + (7 * 86400), '/');
+        $token = getExpectedToken($data);
+        setcookie('auth_token', $token, time() + (7 * 86400), '/');
 
         jsonResponse([
             'success' => true,
             'message' => 'Giriş başarılı!',
-            'token' => 'php-sess-' . session_id(),
+            'token' => $token,
             'user' => ['username' => $adminUser]
         ]);
     } else {
@@ -152,14 +179,14 @@ if ($route === 'auth/login' && $method === 'POST') {
 // POST /api/auth/logout
 if ($route === 'auth/logout' && $method === 'POST') {
     $_SESSION['admin_auth'] = false;
-    session_destroy();
+    @session_destroy();
     setcookie('auth_token', '', time() - 3600, '/');
     jsonResponse(['success' => true, 'message' => 'Çıkış yapıldı.']);
 }
 
 // GET /api/auth/check
 if ($route === 'auth/check' && $method === 'GET') {
-    $isAuth = !empty($_SESSION['admin_auth']);
+    $isAuth = isAuthenticated($data);
     jsonResponse(['authenticated' => $isAuth]);
 }
 
@@ -473,6 +500,7 @@ if ($route === 'admin/change-password' && $method === 'POST') {
         $data['security']['adminUsername'] = $user;
     }
     writeData($dataFile, $data);
+    setcookie('auth_token', getExpectedToken($data), time() + (7 * 86400), '/');
     jsonResponse(['success' => true, 'message' => 'Şifreniz başarıyla güncellendi!']);
 }
 
