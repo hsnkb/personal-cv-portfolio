@@ -1,15 +1,17 @@
 /* ==========================================================================
    Modern Executive Portfolio Design System
-   Tek Renk Düz Arka Plan (Kare Desensiz, Kenarlarla Bütünleşik)
+   Kare Desensiz, Kenarlardan Ayrışan Belirgin Sayfa Tasarımı
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-hover: #f8fafc;
+  /* Sayfa kenarları (dış arka plan) ile orta CV sayfası farklı ve net kontrastlı */
+  --bg-outer: #dfe6ef;
+  --bg-page: #ffffff;
+  --bg-secondary: #f4f7fb;
+  --bg-surface: #f8fafc;
+  --bg-surface-hover: #ffffff;
   --bg-glass: rgba(255, 255, 255, 0.92);
   --text-primary: #0f172a;
   --text-secondary: #334155;
@@ -19,36 +21,62 @@
   --accent-primary: #0f172a;
   --accent-brand: #2563eb;
   --accent-contrast: #ffffff;
-  --card-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.04);
-  --card-shadow-hover: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+  --card-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+  --card-shadow-hover: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
 }
 
 html.dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
+  --bg-outer: #070b12;
+  --bg-page: #111827;
+  --bg-secondary: #161f33;
   --bg-surface: #1e293b;
-  --bg-surface-hover: #263349;
-  --bg-glass: rgba(15, 23, 42, 0.92);
+  --bg-surface-hover: #263449;
+  --bg-glass: rgba(17, 24, 39, 0.92);
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --accent-primary: #3b82f6;
   --accent-brand: #60a5fa;
   --accent-contrast: #ffffff;
   --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.25);
-  --card-shadow-hover: 0 12px 28px -4px rgba(0, 0, 0, 0.35);
+  --card-shadow-hover: 0 12px 28px -4px rgba(0, 0, 0, 0.4);
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-outer);
   background-image: none;
   color: var(--text-primary);
   scroll-behavior: smooth;
   letter-spacing: -0.011em;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Orta CV Sayfa Gövdesi (Kenarlardan net olarak ayrılan beyaz sayfa katmanı) */
+.page-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--bg-page);
+  border-left: 1px solid var(--border-strong);
+  border-right: 1px solid var(--border-strong);
+  box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.14);
+}
+
+@media (min-width: 1280px) {
+  body {
+    padding: 1.75rem 1.5rem 2.5rem;
+  }
+  .page-shell {
+    border: 1px solid var(--border-strong);
+    border-radius: 1.25rem;
+    overflow: clip;
+  }
+}
+
+.section-alt {
+  background-color: var(--bg-secondary);
 }
 
 .font-serif-editorial {
@@ -60,12 +88,7 @@ code, pre, .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Kartlar ve Yüzeyler (Kare deseni tamamen kaldırıldı, düz ve bütünleşik arka plan) */
-.bg-architectural-grid {
-  background-color: var(--bg-primary);
-  background-image: none;
-}
-
+/* Kartlar ve Yüzeyler */
 .surface-nav {
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
@@ -125,7 +148,7 @@ html.dark .surface-card-interactive:hover {
 }
 
 .btn-editorial-secondary {
-  background-color: var(--bg-surface);
+  background-color: var(--bg-page);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
   font-weight: 500;
@@ -139,7 +162,7 @@ html.dark .surface-card-interactive:hover {
 
 /* Filtre Sekmeleri */
 .filter-tab {
-  background-color: var(--bg-surface);
+  background-color: var(--bg-page);
   color: var(--text-muted);
   border: 1px solid var(--border-subtle);
   transition: all 0.2s ease;
@@ -159,15 +182,14 @@ html.dark .surface-card-interactive:hover {
 
 /* Form Inputları */
 .editorial-input {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-page);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .editorial-input:focus {
   outline: none;
-  background-color: var(--bg-surface);
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
@@ -177,7 +199,7 @@ html.dark .surface-card-interactive:hover {
   width: 6px;
   height: 10px;
   border-radius: 2px;
-  background-color: var(--border-subtle);
+  background-color: var(--border-strong);
   transition: background-color 0.25s ease;
 }
 
@@ -220,7 +242,7 @@ html.dark .signal-dot.active {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--bg-outer);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
@@ -288,6 +310,11 @@ html.dark .signal-dot.active {
   body {
     background: #ffffff !important;
     color: #111827 !important;
+    padding: 0 !important;
+  }
+  .page-shell {
+    box-shadow: none !important;
+    border: none !important;
   }
   .no-print {
     display: none !important;
