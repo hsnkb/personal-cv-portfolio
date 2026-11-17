@@ -862,6 +862,48 @@ public class CvApiHandler : IHttpHandler
         return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
     }
 
+    private static List<string> GetStoragePaths(string file, string appDataFile)
+    {
+        List<string> paths = new List<string>();
+        try
+        {
+            string baseDir = Path.GetDirectoryName(Path.GetDirectoryName(file));
+            if (!string.IsNullOrEmpty(baseDir))
+            {
+                string vhostDir = Path.GetDirectoryName(baseDir.TrimEnd('\\', '/'));
+                if (!string.IsNullOrEmpty(vhostDir))
+                {
+                    paths.Add(Path.Combine(vhostDir, "tmp", "hasankaba_cv_store_v2.json"));
+                }
+            }
+        }
+        catch { }
+
+        try { paths.Add(Path.Combine(Path.GetTempPath(), "hasankaba_cv_store_v2.json")); } catch { }
+        try { paths.Add(Path.Combine(HttpRuntime.CodegenDir, "hasankaba_cv_store_v2.json")); } catch { }
+        if (!string.IsNullOrEmpty(appDataFile)) paths.Add(appDataFile);
+        if (!string.IsNullOrEmpty(file)) paths.Add(file);
+        return paths;
+    }
+
+    private static long GetUpdatedTimestamp(Dictionary<string, object> d, string path)
+    {
+        if (d != null && d.ContainsKey("_updatedAt") && d["_updatedAt"] != null)
+        {
+            long ts;
+            if (long.TryParse(Convert.ToString(d["_updatedAt"]), out ts) && ts > 0)
+                return ts;
+        }
+        try
+        {
+            return (long)(File.GetLastWriteTimeUtc(path) - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
     private static Dictionary<string, object> ReadData(string file, string appDataFile, JavaScriptSerializer serializer)
     {
         lock (FileLock)
@@ -869,31 +911,37 @@ public class CvApiHandler : IHttpHandler
             if (MemoryCache != null)
                 return MemoryCache;
 
-            try
+            List<string> candidates = GetStoragePaths(file, appDataFile);
+            Dictionary<string, object> bestData = null;
+            long bestTs = -1;
+
+            foreach (string candidate in candidates)
             {
-                if (File.Exists(appDataFile) && File.Exists(file))
+                try
                 {
-                    if (File.GetLastWriteTimeUtc(appDataFile) >= File.GetLastWriteTimeUtc(file))
+                    if (File.Exists(candidate))
                     {
-                        string rawApp = File.ReadAllText(appDataFile, Encoding.UTF8);
-                        var parsedApp = serializer.DeserializeObject(rawApp) as Dictionary<string, object>;
-                        if (parsedApp != null) { MemoryCache = parsedApp; return MemoryCache; }
+                        string raw = File.ReadAllText(candidate, Encoding.UTF8);
+                        var parsed = serializer.DeserializeObject(raw) as Dictionary<string, object>;
+                        if (parsed != null && parsed.ContainsKey("profile"))
+                        {
+                            long ts = GetUpdatedTimestamp(parsed, candidate);
+                            if (bestData == null || ts > bestTs)
+                            {
+                                bestData = parsed;
+                                bestTs = ts;
+                            }
+                        }
                     }
                 }
-                if (File.Exists(file))
-                {
-                    string raw = File.ReadAllText(file, Encoding.UTF8);
-                    var parsed = serializer.DeserializeObject(raw) as Dictionary<string, object>;
-                    if (parsed != null) { MemoryCache = parsed; return MemoryCache; }
-                }
-                if (File.Exists(appDataFile))
-                {
-                    string rawApp = File.ReadAllText(appDataFile, Encoding.UTF8);
-                    var parsedApp = serializer.DeserializeObject(rawApp) as Dictionary<string, object>;
-                    if (parsedApp != null) { MemoryCache = parsedApp; return MemoryCache; }
-                }
+                catch { }
             }
-            catch { }
+
+            if (bestData != null)
+            {
+                MemoryCache = bestData;
+                return MemoryCache;
+            }
             return null;
         }
     }
@@ -902,26 +950,29 @@ public class CvApiHandler : IHttpHandler
     {
         lock (FileLock)
         {
+            data["_updatedAt"] = NowMs();
             MemoryCache = data;
             string json = serializer.Serialize(data);
             bool saved = false;
-            try
-            {
-                File.WriteAllText(file, json, new UTF8Encoding(false));
-                saved = true;
-            }
-            catch { }
 
-            try
+            string baseDir = Path.GetDirectoryName(Path.GetDirectoryName(file));
+            string appDataFile = Path.Combine(baseDir, "App_Data", "cv-data.json");
+            List<string> candidates = GetStoragePaths(file, appDataFile);
+
+            foreach (string target in candidates)
             {
-                string baseDir = Path.GetDirectoryName(Path.GetDirectoryName(file));
-                string appDataDir = Path.Combine(baseDir, "App_Data");
-                if (!Directory.Exists(appDataDir)) Directory.CreateDirectory(appDataDir);
-                string appDataFile = Path.Combine(appDataDir, "cv-data.json");
-                File.WriteAllText(appDataFile, json, new UTF8Encoding(false));
-                saved = true;
+                try
+                {
+                    string dir = Path.GetDirectoryName(target);
+                    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    File.WriteAllText(target, json, new UTF8Encoding(false));
+                    saved = true;
+                }
+                catch { }
             }
-            catch { }
 
             return saved;
         }

@@ -53,6 +53,27 @@ jobs:
           Copy-Item -Path "app.js" -Destination "publish/app.js" -Force
           Copy-Item -Path "package.json" -Destination "publish/package.json" -Force
           Copy-Item -Path "package-lock.json" -Destination "publish/package-lock.json" -Force
+
+          # Canli sitede (/api/cv) admin panelinden yapilmis guncel degisiklikleri al ve publish/data/cv-data.json dosyasina aktar
+          try {
+            $liveRes = Invoke-RestMethod -Uri "https://hasankaba.com.tr/api/cv" -Method Get -TimeoutSec 10
+            if ($liveRes -and $liveRes.success -and $liveRes.data -and $liveRes.data.profile) {
+              $localData = Get-Content "publish/data/cv-data.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+              $localData.profile = $liveRes.data.profile
+              $localData.about = $liveRes.data.about
+              $localData.experiences = $liveRes.data.experiences
+              $localData.educations = $liveRes.data.educations
+              $localData.skills = $liveRes.data.skills
+              $localData.projects = $liveRes.data.projects
+              $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+              [System.IO.File]::WriteAllText((Resolve-Path "publish/data/cv-data.json").Path, ($localData | ConvertTo-Json -Depth 20), $utf8NoBom)
+              Set-Content -Path "publish/data/.live-synced" -Value "1"
+              Write-Host "Canli API (/api/cv) verileri publish/data/cv-data.json dosyasina basariyla senkronize edildi."
+            }
+          } catch {
+            Write-Host "Canli API senkronizasyonu atlandi: $($_.Exception.Message)"
+          }
+
           Write-Host "Publish klasoru basariyla hazirlandi."
 
       - name: Siteyi bakima al (app_offline.htm)
@@ -109,12 +130,16 @@ jobs:
             curl.exe --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$ftpDir" -Q "RMD $($ftpDir)bin" | Out-Null
           }
 
-          # 2. Sunucuda canli data/cv-data.json var mi ve varsayilan "Ahmet Yilmaz" degil mi kontrol et
-          $remoteDataExists = $false
-          $remoteJson = curl.exe --fail --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)data/cv-data.json"
-          if ($LASTEXITCODE -eq 0 -and $remoteJson -and ($remoteJson -join "`n") -notmatch 'Ahmet') {
-            $remoteDataExists = $true
-            Write-Host "Sunucuda ozellestirilmis data/cv-data.json bulundu, canli veriler korunacak."
+          # 2. Canli API'den (/api/cv) guncel veriler senkronize edildiyse FTP'deki data/cv-data.json'u da guncelle; aksi halde mevcut dosyayi koru
+          $skipDataUpload = $false
+          if (-not (Test-Path "publish/data/.live-synced")) {
+            $remoteJson = curl.exe --fail --silent --ftp-pasv --user "$($env:FTP_USERNAME):$($env:FTP_PASSWORD)" "ftp://$server$($ftpDir)data/cv-data.json"
+            if ($LASTEXITCODE -eq 0 -and $remoteJson -and ($remoteJson -join "`n") -notmatch 'Ahmet') {
+              $skipDataUpload = $true
+              Write-Host "Sunucuda ozellestirilmis data/cv-data.json bulundu, canli veriler korunacak."
+            }
+          } else {
+            Write-Host "Canli API verileri alindi, FTP uzerindeki data/cv-data.json guncellenecek."
           }
 
           # 3. Publish klasorundeki dosyalari FTP'ye aktar
@@ -123,14 +148,14 @@ jobs:
 
           foreach ($file in $files) {
             $relPath = $file.FullName.Substring($publishRoot.Length).TrimStart('\', '/') -replace '\\', '/'
+            if ($file.Name -eq '.live-synced') { continue }
 
             # Kullanicinin yukledigi gorselleri (public/uploads/) atla (.gitkeep haric klasor olusumu icin)
             if ($relPath -like 'public/uploads/*' -and $file.Name -ne '.gitkeep') {
               continue
             }
 
-            # Sunucuda zaten cv-data.json varsa uzerine yazma
-            if ($relPath -eq 'data/cv-data.json' -and $remoteDataExists) {
+            if ($relPath -eq 'data/cv-data.json' -and $skipDataUpload) {
               Write-Host "Atlandi (canli veri korundu): $relPath"
               continue
             }
