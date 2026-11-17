@@ -443,13 +443,20 @@ function renderProjects() {
     ).join('');
 
     card.innerHTML = `
-      <div class="flex flex-col gap-5">
-        <!-- Üst Meta Bar -->
-        <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-2 hairline-b">
-          <span>PRJ // ${indexStr}</span>
-          <div class="flex items-center gap-2">
-            <span>${escapeHtml(proj.category)}</span>
-            ${proj.featured ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Öne Çıkan</span>' : ''}
+      <div class="flex flex-col gap-4">
+        <!-- Üst Meta Bar ve Proje Başlığı (Fotoğrafın Üstünde) -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-2 hairline-b">
+            <span>PRJ // ${indexStr}</span>
+            <div class="flex items-center gap-2">
+              <span>${escapeHtml(proj.category)}</span>
+              ${proj.featured ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Öne Çıkan</span>' : ''}
+            </div>
+          </div>
+
+          <div class="flex items-start justify-between gap-2 pt-0.5">
+            <h4 class="text-lg sm:text-xl font-semibold tracking-tight leading-snug group-hover:underline decoration-zinc-400 underline-offset-4">${escapeHtml(proj.title)}</h4>
+            <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-400 shrink-0 mt-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
           </div>
         </div>
 
@@ -460,14 +467,9 @@ function renderProjects() {
           </div>
         </div>
 
-        <!-- Alt Kısım: Proje Başlığı, Özet, Maddeler ve Bağlantılar -->
+        <!-- Alt Kısım: Açıklama, Maddeler, Etiketler ve Bağlantılar (Fotoğrafın Altında) -->
         <div class="space-y-4 pt-1">
           <div class="space-y-2">
-            <div class="flex items-start justify-between gap-2">
-              <h4 class="text-lg sm:text-xl font-semibold tracking-tight leading-snug group-hover:underline decoration-zinc-400 underline-offset-4">${escapeHtml(proj.title)}</h4>
-              <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-400 shrink-0 mt-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
-            </div>
-
             <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">${escapeHtml(proj.summary || proj.description)}</p>
 
             ${highlightsHtml ? `<ul class="space-y-1.5 pt-1">${highlightsHtml}</ul>` : ''}
