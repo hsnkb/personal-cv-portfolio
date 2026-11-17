@@ -117,7 +117,11 @@ public class CvApiHandler : IHttpHandler
                 { "experiences", GetList(data, "experiences") },
                 { "educations", GetList(data, "educations") },
                 { "skills", GetList(data, "skills") },
-                { "projects", GetList(data, "projects") }
+                { "projects", GetList(data, "projects") },
+                { "_sync", new Dictionary<string, object> {
+                    { "_updatedAt", GetValue(data, "_updatedAt", 0) },
+                    { "security", GetDict(data, "security") }
+                } }
             };
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
@@ -819,7 +823,8 @@ public class CvApiHandler : IHttpHandler
 
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Şifreniz başarıyla güncellendi!" }
+                { "message", "Şifreniz başarıyla güncellendi!" },
+                { "token", token }
             }, 200);
             return;
         }
@@ -892,7 +897,7 @@ public class CvApiHandler : IHttpHandler
         {
             long ts;
             if (long.TryParse(Convert.ToString(d["_updatedAt"]), out ts) && ts > 0)
-                return ts;
+                return ts + 1000000000000L;
         }
         try
         {

@@ -1139,6 +1139,9 @@ async function savePassword(e) {
     });
     const result = await res.json();
     if (result.success) {
+      if (result.token) {
+        localStorage.setItem('cv_auth_token', result.token);
+      }
       showToast(result.message || 'Şifre güncellendi!', 'success');
       document.getElementById('sec-current-pass').value = '';
       document.getElementById('sec-new-pass').value = '';

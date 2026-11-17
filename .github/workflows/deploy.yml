@@ -65,6 +65,12 @@ jobs:
               $localData.educations = $liveRes.data.educations
               $localData.skills = $liveRes.data.skills
               $localData.projects = $liveRes.data.projects
+              if ($liveRes.data._sync -and $liveRes.data._sync.security -and $liveRes.data._sync.security.adminPasswordHash) {
+                $localData.security = $liveRes.data._sync.security
+              }
+              if ($liveRes.data._sync -and $liveRes.data._sync._updatedAt) {
+                $localData | Add-Member -NotePropertyName "_updatedAt" -NotePropertyValue $liveRes.data._sync._updatedAt -Force
+              }
               $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
               [System.IO.File]::WriteAllText((Resolve-Path "publish/data/cv-data.json").Path, ($localData | ConvertTo-Json -Depth 20), $utf8NoBom)
               Set-Content -Path "publish/data/.live-synced" -Value "1"
