@@ -126,6 +126,37 @@ public class CvApiHandler : IHttpHandler
             return;
         }
 
+        // GET /api/media/{filename} (App_Data/uploads veya public/uploads icindeki gorselleri sunar)
+        if (route.StartsWith("media/", StringComparison.OrdinalIgnoreCase) && method == "GET")
+        {
+            string rawName = Path.GetFileName(route.Substring("media/".Length).Trim('/'));
+            if (!string.IsNullOrEmpty(rawName))
+            {
+                string appUploadsDir = Path.Combine(appDataDir, "uploads");
+                string candidate1 = Path.Combine(appUploadsDir, rawName);
+                string candidate2 = Path.Combine(uploadsDir, rawName);
+                string foundPath = File.Exists(candidate1) ? candidate1 : (File.Exists(candidate2) ? candidate2 : null);
+
+                if (foundPath != null)
+                {
+                    string ext = (Path.GetExtension(foundPath) ?? "").ToLowerInvariant();
+                    string mime = "image/jpeg";
+                    if (ext == ".png") mime = "image/png";
+                    else if (ext == ".gif") mime = "image/gif";
+                    else if (ext == ".webp") mime = "image/webp";
+                    else if (ext == ".svg") mime = "image/svg+xml";
+                    else if (ext == ".ico") mime = "image/x-icon";
+
+                    res.ContentType = mime;
+                    res.AddHeader("Cache-Control", "public, max-age=31536000");
+                    res.WriteFile(foundPath);
+                    return;
+                }
+            }
+            res.StatusCode = 404;
+            return;
+        }
+
         // POST /api/contact
         if (route.Equals("contact", StringComparison.OrdinalIgnoreCase) && method == "POST")
         {
@@ -597,6 +628,70 @@ public class CvApiHandler : IHttpHandler
         // RESİM YÜKLEME
         if (route.Equals("admin/upload", StringComparison.OrdinalIgnoreCase) && method == "POST")
         {
+            string appUploadsDir = Path.Combine(appDataDir, "uploads");
+
+            // 1. JSON Base64 Yükleme Desteği
+            string base64Input = GetString(body, "base64").Trim();
+            if (!string.IsNullOrEmpty(base64Input) && base64Input.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+            {
+                int commaIdx = base64Input.IndexOf(',');
+                if (commaIdx > 0)
+                {
+                    try
+                    {
+                        string meta = base64Input.Substring(0, commaIdx).ToLowerInvariant();
+                        string rawB64 = base64Input.Substring(commaIdx + 1);
+                        byte[] fileBytes = Convert.FromBase64String(rawB64);
+
+                        string ext = ".jpg";
+                        if (meta.Contains("image/png")) ext = ".png";
+                        else if (meta.Contains("image/gif")) ext = ".gif";
+                        else if (meta.Contains("image/webp")) ext = ".webp";
+                        else if (meta.Contains("image/svg")) ext = ".svg";
+
+                        string filename = "upload-" + NowMs() + "-" + new Random().Next(1000, 9999) + ext;
+
+                        // Önce public/uploads klasörüne kaydetmeyi dene
+                        try
+                        {
+                            if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
+                            File.WriteAllBytes(Path.Combine(uploadsDir, filename), fileBytes);
+                            WriteJson(res, serializer, new Dictionary<string, object> {
+                                { "success", true },
+                                { "message", "Dosya başarıyla yüklendi." },
+                                { "url", "/uploads/" + filename }
+                            }, 200);
+                            return;
+                        }
+                        catch { }
+
+                        // IIS public/uploads yazma izni yoksa App_Data/uploads klasörüne kaydet
+                        try
+                        {
+                            if (!Directory.Exists(appUploadsDir)) Directory.CreateDirectory(appUploadsDir);
+                            File.WriteAllBytes(Path.Combine(appUploadsDir, filename), fileBytes);
+                            WriteJson(res, serializer, new Dictionary<string, object> {
+                                { "success", true },
+                                { "message", "Dosya başarıyla yüklendi." },
+                                { "url", "/api/media/" + filename }
+                            }, 200);
+                            return;
+                        }
+                        catch { }
+                    }
+                    catch { }
+                }
+
+                // Disk yazma tamamen kapalıysa doğrudan Base64 Data URI döndür (Asla hata vermez)
+                WriteJson(res, serializer, new Dictionary<string, object> {
+                    { "success", true },
+                    { "message", "Görsel başarıyla hazırlandı." },
+                    { "url", base64Input }
+                }, 200);
+                return;
+            }
+
+            // 2. Multipart Form-Data Yükleme Desteği
             if (req.Files.Count == 0 || req.Files["file"] == null || req.Files["file"].ContentLength == 0)
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
@@ -607,27 +702,70 @@ public class CvApiHandler : IHttpHandler
             }
 
             HttpPostedFile file = req.Files["file"];
-            string ext = (Path.GetExtension(file.FileName) ?? "").ToLowerInvariant();
-            string[] allowed = new string[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
-            if (Array.IndexOf(allowed, ext) < 0)
+            string fileExt = (Path.GetExtension(file.FileName) ?? "").ToLowerInvariant();
+            string[] allowed = new string[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".avif", ".jfif", ".ico" };
+            if (Array.IndexOf(allowed, fileExt) < 0)
+            {
+                fileExt = ".jpg";
+            }
+
+            string outName = "upload-" + NowMs() + "-" + new Random().Next(1000, 9999) + fileExt;
+
+            // Önce public/uploads klasörüne kaydetmeyi dene
+            try
+            {
+                if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
+                string targetPath = Path.Combine(uploadsDir, outName);
+                file.SaveAs(targetPath);
+                WriteJson(res, serializer, new Dictionary<string, object> {
+                    { "success", true },
+                    { "message", "Dosya başarıyla yüklendi." },
+                    { "url", "/uploads/" + outName }
+                }, 200);
+                return;
+            }
+            catch { }
+
+            // IIS public/uploads yazma izni yoksa App_Data/uploads klasörüne kaydet
+            try
+            {
+                if (!Directory.Exists(appUploadsDir)) Directory.CreateDirectory(appUploadsDir);
+                string appTargetPath = Path.Combine(appUploadsDir, outName);
+                file.SaveAs(appTargetPath);
+                WriteJson(res, serializer, new Dictionary<string, object> {
+                    { "success", true },
+                    { "message", "Dosya başarıyla yüklendi." },
+                    { "url", "/api/media/" + outName }
+                }, 200);
+                return;
+            }
+            catch { }
+
+            // Her iki klasöre de yazma izni yoksa dosyayı bellekte Base64 Data URI'ye çevirip döndür
+            try
+            {
+                file.InputStream.Position = 0;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    file.InputStream.CopyTo(ms);
+                    string b64 = Convert.ToBase64String(ms.ToArray());
+                    string mime = !string.IsNullOrEmpty(file.ContentType) ? file.ContentType : "image/jpeg";
+                    WriteJson(res, serializer, new Dictionary<string, object> {
+                        { "success", true },
+                        { "message", "Görsel başarıyla işlendi." },
+                        { "url", "data:" + mime + ";base64," + b64 }
+                    }, 200);
+                    return;
+                }
+            }
+            catch (Exception ex)
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Sadece resim dosyaları (JPG, PNG, GIF, WebP, SVG) yüklenebilir!" }
-                }, 400);
+                    { "message", "Görsel işlenemedi: " + ex.Message }
+                }, 500);
                 return;
             }
-
-            string filename = "upload-" + NowMs() + "-" + new Random().Next(1000, 9999) + ext;
-            string targetPath = Path.Combine(uploadsDir, filename);
-            file.SaveAs(targetPath);
-
-            WriteJson(res, serializer, new Dictionary<string, object> {
-                { "success", true },
-                { "message", "Dosya başarıyla yüklendi." },
-                { "url", "/uploads/" + filename }
-            }, 200);
-            return;
         }
 
         // ŞİFRE DEĞİŞTİRME

@@ -463,22 +463,51 @@ if (preg_match('#^admin/messages/(.+)$#', $route, $matches) && $method === 'DELE
 // RESİM YÜKLEME
 if ($route === 'admin/upload' && $method === 'POST') {
     requireAuth();
+
+    // 1. JSON Base64 Yükleme Desteği
+    if (!empty($body['base64'])) {
+        if (preg_match('/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/', $body['base64'], $m)) {
+            $ext = strtolower(str_replace(['jpeg', 'svg+xml'], ['jpg', 'svg'], $m[1]));
+            $raw = base64_decode($m[2]);
+            $filename = 'upload-' . time() . '-' . rand(1000, 9999) . '.' . $ext;
+            if (!file_exists($uploadsDir)) {
+                @mkdir($uploadsDir, 0777, true);
+            }
+            $target = $uploadsDir . '/' . $filename;
+            if (@file_put_contents($target, $raw) !== false) {
+                jsonResponse(['success' => true, 'message' => 'Görsel başarıyla yüklendi.', 'url' => '/uploads/' . $filename]);
+            }
+        }
+        // Disk izin hatası varsa doğrudan Base64 Data URI döndür
+        jsonResponse(['success' => true, 'message' => 'Görsel hazırlandı.', 'url' => $body['base64']]);
+    }
+
+    // 2. Multipart Form-Data Yükleme Desteği
     if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
         jsonResponse(['success' => false, 'message' => 'Dosya yükleme hatası.'], 400);
     }
 
     $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'avif', 'jfif', 'ico'];
     if (!in_array($ext, $allowed)) {
-        jsonResponse(['success' => false, 'message' => 'Geçersiz dosya türü.'], 400);
+        $ext = 'jpg';
+    }
+
+    if (!file_exists($uploadsDir)) {
+        @mkdir($uploadsDir, 0777, true);
     }
 
     $filename = 'upload-' . time() . '-' . rand(1000, 9999) . '.' . $ext;
     $target = $uploadsDir . '/' . $filename;
 
-    if (move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
+    if (@move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
         jsonResponse(['success' => true, 'message' => 'Yüklendi.', 'url' => '/uploads/' . $filename]);
     } else {
+        $tmpData = @file_get_contents($_FILES['file']['tmp_name']);
+        if ($tmpData !== false) {
+            $mime = $_FILES['file']['type'] ?: 'image/jpeg';
+            jsonResponse(['success' => true, 'message' => 'Görsel işlendi.', 'url' => 'data:' . $mime . ';base64,' . base64_encode($tmpData)]);
+        }
         jsonResponse(['success' => false, 'message' => 'Dosya kaydedilemedi.'], 500);
     }
 }

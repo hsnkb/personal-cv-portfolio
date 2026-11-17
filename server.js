@@ -532,6 +532,28 @@ app.delete('/api/admin/messages/:id', requireAuth, (req, res) => {
 
 // DOSYA YÜKLEME (Profil fotoğrafı & Proje görseli)
 app.post('/api/admin/upload', requireAuth, (req, res) => {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (e) {}
+  }
+
+  // JSON Base64 Yükleme Desteği
+  if (req.is('application/json') && req.body && req.body.base64) {
+    try {
+      const matches = req.body.base64.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
+      if (!matches) {
+        return res.status(400).json({ success: false, message: 'Geçersiz görsel verisi.' });
+      }
+      const ext = matches[1].toLowerCase().replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+      const buffer = Buffer.from(matches[2], 'base64');
+      const filename = `upload-${Date.now()}-${Math.round(Math.random() * 1e6)}.${ext}`;
+      const filePath = path.join(UPLOADS_DIR, filename);
+      fs.writeFileSync(filePath, buffer);
+      return res.json({ success: true, message: 'Dosya başarıyla yüklendi.', url: '/uploads/' + filename });
+    } catch (e) {
+      return res.json({ success: true, message: 'Görsel hazırlandı.', url: req.body.base64 });
+    }
+  }
+
   upload.single('file')(req, res, (err) => {
     if (err) {
       return res.status(400).json({ success: false, message: err.message });

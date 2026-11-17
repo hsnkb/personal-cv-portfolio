@@ -1,21 +1,29 @@
 // Admin Panel JavaScript Yönetim Motoru
 let adminData = null;
 
-// IIS / Plesk paylaşımlı hostinglerde PUT, DELETE, PATCH engellerini (405 Method Not Allowed) aşmak için
+// IIS / Plesk paylaşımlı hostinglerde PUT, DELETE, PATCH engellerini (405 Method Not Allowed) aşmak ve Authorization token eklemek için
 const _nativeFetch = window.fetch.bind(window);
 window.fetch = function (input, init = {}) {
-  if (typeof input === 'string' && input.startsWith('/api/') && init && init.method) {
-    const m = String(init.method).toUpperCase();
-    if (m === 'PUT' || m === 'DELETE' || m === 'PATCH') {
-      const headers = new Headers(init.headers || {});
-      headers.set('X-HTTP-Method-Override', m);
-      const sep = input.includes('?') ? '&' : '?';
-      return _nativeFetch(`${input}${sep}_method=${m}`, {
-        ...init,
-        method: 'POST',
-        headers
-      });
+  if (typeof input === 'string' && input.startsWith('/api/')) {
+    const headers = new Headers(init.headers || {});
+    const savedToken = localStorage.getItem('cv_auth_token');
+    if (savedToken && !headers.has('Authorization')) {
+      headers.set('Authorization', 'Bearer ' + savedToken);
     }
+    const nextInit = { ...init, headers, credentials: 'same-origin' };
+    if (nextInit.method) {
+      const m = String(nextInit.method).toUpperCase();
+      if (m === 'PUT' || m === 'DELETE' || m === 'PATCH') {
+        headers.set('X-HTTP-Method-Override', m);
+        const sep = input.includes('?') ? '&' : '?';
+        return _nativeFetch(`${input}${sep}_method=${m}`, {
+          ...nextInit,
+          method: 'POST',
+          headers
+        });
+      }
+    }
+    return _nativeFetch(input, nextInit);
   }
   return _nativeFetch(input, init);
 };
@@ -233,6 +241,9 @@ async function handleLogin(e) {
     const result = await res.json();
 
     if (result.success) {
+      if (result.token) {
+        localStorage.setItem('cv_auth_token', result.token);
+      }
       showToast('Giriş başarılı!', 'success');
       showAdminView();
       await fetchAdminData();
@@ -254,6 +265,7 @@ async function handleLogin(e) {
 // Çıkış İşlemi
 async function handleLogout() {
   try {
+    localStorage.removeItem('cv_auth_token');
     await fetch('/api/auth/logout', { method: 'POST' });
     showToast('Oturum kapatıldı.', 'info');
     showLoginView();
@@ -262,28 +274,76 @@ async function handleLogout() {
   }
 }
 
-// Resim Yükleme Servisi
-async function uploadImageFile(file, onSuccess) {
-  const formData = new FormData();
-  formData.append('file', file);
+// Görseli Tarayıcıda Optimize Etme & Base64'e Dönüştürme (IIS/PHP boyut ve izin hatalarını önler)
+function optimizeImageToBase64(file, maxWidth = 1400, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+        return resolve(dataUrl);
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const outMime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          const compressedDataUrl = canvas.toDataURL(outMime, quality);
+          resolve(compressedDataUrl);
+        } catch (err) {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
 
-  showToast('Görsel sunucuya yükleniyor...', 'info');
+// Resim Yükleme Servisi (Hem Sunucu Kaydı Hem Otomatik Base64 Yedekli)
+async function uploadImageFile(file, onSuccess) {
+  showToast('Görsel işleniyor ve yükleniyor...', 'info');
 
   try {
-    const res = await fetch('/api/admin/upload', {
-      method: 'POST',
-      body: formData
-    });
-    const result = await res.json();
+    const optimizedBase64 = await optimizeImageToBase64(file);
 
-    if (result.success && result.url) {
-      showToast('Görsel başarıyla yüklendi!', 'success');
-      onSuccess(result.url);
-    } else {
-      showToast(result.message || 'Görsel yüklenemedi.', 'error');
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          base64: optimizedBase64,
+          filename: file.name
+        })
+      });
+      const result = await res.json();
+
+      if (result && result.success && result.url) {
+        showToast('Görsel başarıyla yüklendi!', 'success');
+        onSuccess(result.url);
+        return;
+      }
+    } catch (serverErr) {
+      console.warn('Sunucu upload yerine doğrudan gömülü görsel kullanılıyor:', serverErr);
     }
+
+    // Sunucu diski yazmaya kapalıysa doğrudan optimize edilmiş görseli kullan
+    showToast('Görsel başarıyla hazırlandı!', 'success');
+    onSuccess(optimizedBase64);
   } catch (err) {
-    showToast('Görsel yüklenirken sunucu hatası oluştu.', 'error');
+    showToast('Görsel okunurken hata oluştu.', 'error');
   }
 }
 
