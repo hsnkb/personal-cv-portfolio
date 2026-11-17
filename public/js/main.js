@@ -443,29 +443,28 @@ function renderProjects() {
     ).join('');
 
     card.innerHTML = `
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-        <!-- Sol Sütun: Kenarlıklı ve Kırpılmayan Görsel Çerçevesi (5 Kolon) -->
-        <div class="md:col-span-5">
-          <div class="p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 shadow-sm">
-            <div class="rounded-lg overflow-hidden border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 flex items-center justify-center">
-              <img src="${escapeHtml(proj.image)}" alt="${escapeHtml(proj.title)}" class="w-full h-52 sm:h-56 object-contain group-hover:scale-[1.02] transition duration-500">
-            </div>
+      <div class="flex flex-col gap-5">
+        <!-- Üst Meta Bar -->
+        <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-2 hairline-b">
+          <span>PRJ // ${indexStr}</span>
+          <div class="flex items-center gap-2">
+            <span>${escapeHtml(proj.category)}</span>
+            ${proj.featured ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Öne Çıkan</span>' : ''}
           </div>
         </div>
 
-        <!-- Sağ Sütun: Proje Meta Bilgisi, Başlık, Özet ve Bağlantılar (7 Kolon) -->
-        <div class="md:col-span-7 flex flex-col justify-between space-y-4">
-          <div class="space-y-2.5">
-            <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 pb-2 hairline-b">
-              <span>PRJ // ${indexStr}</span>
-              <div class="flex items-center gap-2">
-                <span>${escapeHtml(proj.category)}</span>
-                ${proj.featured ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Öne Çıkan</span>' : ''}
-              </div>
-            </div>
+        <!-- Tam Genişlik Kenarlıklı Görsel Çerçevesi -->
+        <div class="w-full p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 shadow-sm">
+          <div class="rounded-lg overflow-hidden border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 flex items-center justify-center">
+            <img src="${escapeHtml(proj.image)}" alt="${escapeHtml(proj.title)}" class="w-full max-h-[460px] object-contain group-hover:scale-[1.01] transition duration-500">
+          </div>
+        </div>
 
-            <div class="flex items-start justify-between gap-2 pt-1">
-              <h4 class="text-lg font-semibold tracking-tight leading-snug group-hover:underline decoration-zinc-400 underline-offset-4">${escapeHtml(proj.title)}</h4>
+        <!-- Alt Kısım: Proje Başlığı, Özet, Maddeler ve Bağlantılar -->
+        <div class="space-y-4 pt-1">
+          <div class="space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="text-lg sm:text-xl font-semibold tracking-tight leading-snug group-hover:underline decoration-zinc-400 underline-offset-4">${escapeHtml(proj.title)}</h4>
               <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-400 shrink-0 mt-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
             </div>
 
@@ -474,28 +473,26 @@ function renderProjects() {
             ${highlightsHtml ? `<ul class="space-y-1.5 pt-1">${highlightsHtml}</ul>` : ''}
           </div>
 
-          <div class="space-y-4 pt-2">
-            ${tagsHtml ? `<div class="flex flex-wrap gap-1.5">${tagsHtml}</div>` : ''}
+          ${tagsHtml ? `<div class="flex flex-wrap gap-1.5">${tagsHtml}</div>` : ''}
 
-            <div class="pt-3 hairline-t flex items-center justify-between text-xs">
-              <span class="font-mono text-[11px] text-zinc-500 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white transition">
-                Vaka Detayı →
-              </span>
+          <div class="pt-3 hairline-t flex items-center justify-between text-xs">
+            <span class="font-mono text-[11px] text-zinc-500 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white transition">
+              Vaka Detayı →
+            </span>
 
-              <div class="flex items-center gap-2">
-                ${proj.githubUrl ? `
-                  <a href="${escapeHtml(proj.githubUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md btn-editorial-secondary text-[11px] font-mono" title="Kaynak Kod (GitHub)">
-                    <i data-lucide="github" class="w-3.5 h-3.5"></i>
-                    <span>GitHub</span>
-                  </a>
-                ` : ''}
-                ${proj.demoUrl ? `
-                  <a href="${escapeHtml(proj.demoUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md btn-editorial-secondary text-[11px] font-mono" title="Canlı Önizleme">
-                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                    <span>Demo</span>
-                  </a>
-                ` : ''}
-              </div>
+            <div class="flex items-center gap-2">
+              ${proj.githubUrl ? `
+                <a href="${escapeHtml(proj.githubUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md btn-editorial-secondary text-[11px] font-mono" title="Kaynak Kod (GitHub)">
+                  <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                  <span>GitHub</span>
+                </a>
+              ` : ''}
+              ${proj.demoUrl ? `
+                <a href="${escapeHtml(proj.demoUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md btn-editorial-secondary text-[11px] font-mono" title="Canlı Önizleme">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  <span>Demo</span>
+                </a>
+              ` : ''}
             </div>
           </div>
         </div>
