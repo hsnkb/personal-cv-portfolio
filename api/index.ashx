@@ -872,6 +872,23 @@ public class CvApiHandler : IHttpHandler
         List<string> paths = new List<string>();
         try
         {
+            string codegen = HttpRuntime.CodegenDir;
+            if (!string.IsNullOrEmpty(codegen))
+            {
+                string codegenParent = Path.GetDirectoryName(codegen.TrimEnd('\\', '/'));
+                if (!string.IsNullOrEmpty(codegenParent))
+                {
+                    paths.Add(Path.Combine(codegenParent, "hasankaba_cv_store_v2.json"));
+                }
+                paths.Add(Path.Combine(codegen, "hasankaba_cv_store_v2.json"));
+            }
+        }
+        catch { }
+
+        try { paths.Add(Path.Combine(Path.GetTempPath(), "hasankaba_cv_store_v2.json")); } catch { }
+
+        try
+        {
             string baseDir = Path.GetDirectoryName(Path.GetDirectoryName(file));
             if (!string.IsNullOrEmpty(baseDir))
             {
@@ -884,8 +901,6 @@ public class CvApiHandler : IHttpHandler
         }
         catch { }
 
-        try { paths.Add(Path.Combine(Path.GetTempPath(), "hasankaba_cv_store_v2.json")); } catch { }
-        try { paths.Add(Path.Combine(HttpRuntime.CodegenDir, "hasankaba_cv_store_v2.json")); } catch { }
         if (!string.IsNullOrEmpty(appDataFile)) paths.Add(appDataFile);
         if (!string.IsNullOrEmpty(file)) paths.Add(file);
         return paths;
@@ -968,11 +983,16 @@ public class CvApiHandler : IHttpHandler
             {
                 try
                 {
-                    string dir = Path.GetDirectoryName(target);
-                    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    try
                     {
-                        Directory.CreateDirectory(dir);
+                        string dir = Path.GetDirectoryName(target);
+                        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
                     }
+                    catch { }
+
                     File.WriteAllText(target, json, new UTF8Encoding(false));
                     saved = true;
                 }
