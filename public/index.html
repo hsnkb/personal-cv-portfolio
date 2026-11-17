@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">Kişisel Portfolyo & CV</title>
-  <meta name="description" id="meta-description" content="Kişisel CV, projeler ve çalışmalar">
-  
+  <title id="page-title">Hasan Kaba — Bilgisayar Mühendisi & Full Stack Geliştirici</title>
+  <meta name="description" id="meta-description" content="Hasan Kaba — Kurumsal yazılım mimarisi, Java/Spring Boot, React/Angular ve modern web sistemleri portfolyosu.">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -13,282 +13,235 @@
       darkMode: 'class',
       theme: {
         extend: {
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              200: '#bfdbfe',
-              300: '#93c5fd',
-              400: '#60a5fa',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a',
-            }
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            serif: ['Instrument Serif', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'monospace']
           }
         }
       }
     }
   </script>
 
+  <!-- Tema Başlangıç Kontrolü (Sayfa parlamasını önler) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('portfolio_theme');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Özel Stiller -->
+  <!-- Özel Mimari Stiller -->
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen selection:bg-brand-500 selection:text-white bg-mesh antialiased">
+<body class="min-h-screen bg-architectural-grid antialiased selection:bg-zinc-900 selection:text-white dark:selection:bg-zinc-100 dark:selection:text-zinc-900">
 
   <!-- Toast Bildirim Konteyneri -->
   <div id="toast-container"></div>
 
-  <!-- Üst Menü (Navbar) -->
-  <header class="sticky top-0 z-50 glass-nav transition-all duration-300">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <!-- Logo / İsim -->
-      <a href="#" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform" id="nav-initials">
-          AY
-        </div>
-        <div>
-          <span class="font-bold text-lg text-white group-hover:text-brand-400 transition-colors" id="nav-name">Ahmet Yılmaz</span>
-          <span class="block text-xs text-slate-400" id="nav-title">Full Stack Developer</span>
-        </div>
-      </a>
-
-      <!-- Masaüstü Navigasyon -->
-      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-300">
-        <a href="#about" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">Hakkımda</a>
-        <a href="#experience" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">Deneyim</a>
-        <a href="#skills" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">Yetenekler</a>
-        <a href="#projects" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">Projeler</a>
-        <a href="#contact" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition">İletişim</a>
-      </nav>
-
-      <!-- Aksiyon Butonları -->
-      <div class="flex items-center gap-3">
-        <a href="/print-cv" target="_blank" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition">
-          <i data-lucide="printer" class="w-4 h-4 text-brand-400"></i>
-          <span>CV Yazdır / PDF</span>
+  <!-- ÜST MİMARİ BAR (Header) -->
+  <header class="sticky top-0 z-50 surface-nav transition-colors duration-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Sol: Monogram & İsim -->
+      <div class="flex items-center gap-4">
+        <a href="#" class="flex items-center gap-3 group">
+          <div class="w-8 h-8 rounded-md surface-card flex items-center justify-center font-mono text-xs font-semibold tracking-tighter group-hover:border-zinc-400 dark:group-hover:border-zinc-500 transition" id="nav-initials">
+            HK
+          </div>
+          <div class="flex flex-col">
+            <span class="font-semibold text-sm tracking-tight leading-none" id="nav-name">Hasan Kaba</span>
+            <span class="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono mt-1 leading-none" id="nav-title">Full Stack Engineer</span>
+          </div>
         </a>
 
-        <a href="/admin" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-md shadow-brand-600/30 transition transform hover:-translate-y-0.5">
-          <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>Yönetim Paneli</span>
+        <div class="hidden lg:flex items-center gap-2 pl-4 ml-2 border-l border-zinc-200 dark:border-zinc-800/80 text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span id="nav-clock">TR · ANKARA</span>
+        </div>
+      </div>
+
+      <!-- Orta: Numaralı Mimari Navigasyon -->
+      <nav class="hidden md:flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+        <a href="#about" class="px-3 py-1.5 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 mr-1">01</span>Hakkımda
+        </a>
+        <a href="#experience" class="px-3 py-1.5 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 mr-1">02</span>Deneyim
+        </a>
+        <a href="#skills" class="px-3 py-1.5 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 mr-1">03</span>Mimari
+        </a>
+        <a href="#projects" class="px-3 py-1.5 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 mr-1">04</span>Çalışmalar
+        </a>
+        <a href="#contact" class="px-3 py-1.5 rounded-md hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 mr-1">05</span>İletişim
+        </a>
+      </nav>
+
+      <!-- Sağ: Tema Değiştirici, CV/PDF & Yönetim -->
+      <div class="flex items-center gap-2">
+        <!-- Tema Butonu -->
+        <button id="theme-toggle-btn" type="button" class="w-8 h-8 rounded-md btn-editorial-secondary flex items-center justify-center" title=" Görünüm Modunu Değiştir">
+          <i data-lucide="sun" class="w-3.5 h-3.5 hidden dark:block"></i>
+          <i data-lucide="moon" class="w-3.5 h-3.5 block dark:hidden"></i>
+        </button>
+
+        <a href="/print-cv" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs btn-editorial-secondary">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>CV / PDF</span>
+        </a>
+
+        <a href="/admin" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs btn-editorial-primary" title="Yönetim Paneli">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Yönetim</span>
         </a>
 
         <!-- Mobil Menü Butonu -->
-        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg bg-white/5 text-slate-300 hover:text-white">
-          <i data-lucide="menu" class="w-6 h-6"></i>
+        <button id="mobile-menu-btn" class="md:hidden w-8 h-8 rounded-md btn-editorial-secondary flex items-center justify-center">
+          <i data-lucide="menu" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
     <!-- Mobil Açılır Menü -->
-    <div id="mobile-menu" class="hidden md:hidden glass border-b border-white/10 px-4 pt-2 pb-6 space-y-2">
-      <a href="#about" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 mobile-link">Hakkımda</a>
-      <a href="#experience" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 mobile-link">Deneyim</a>
-      <a href="#skills" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 mobile-link">Yetenekler</a>
-      <a href="#projects" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 mobile-link">Projeler</a>
-      <a href="#contact" class="block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 mobile-link">İletişim</a>
-      <a href="/print-cv" target="_blank" class="flex items-center gap-2 px-3 py-2 rounded-lg text-brand-400 hover:bg-white/5">
-        <i data-lucide="printer" class="w-4 h-4"></i>
-        <span>CV Yazdır / PDF İndir</span>
-      </a>
+    <div id="mobile-menu" class="hidden md:hidden surface-card border-x-0 border-t hairline-b px-4 pt-3 pb-5 space-y-1.5">
+      <a href="#about" class="block px-3 py-2 rounded-md text-xs font-medium mobile-link"><span class="font-mono text-zinc-400 mr-2">01 /</span>Hakkımda</a>
+      <a href="#experience" class="block px-3 py-2 rounded-md text-xs font-medium mobile-link"><span class="font-mono text-zinc-400 mr-2">02 /</span>Deneyim & Eğitim</a>
+      <a href="#skills" class="block px-3 py-2 rounded-md text-xs font-medium mobile-link"><span class="font-mono text-zinc-400 mr-2">03 /</span>Teknik Mimari</a>
+      <a href="#projects" class="block px-3 py-2 rounded-md text-xs font-medium mobile-link"><span class="font-mono text-zinc-400 mr-2">04 /</span>Seçkin Çalışmalar</a>
+      <a href="#contact" class="block px-3 py-2 rounded-md text-xs font-medium mobile-link"><span class="font-mono text-zinc-400 mr-2">05 /</span>İletişim</a>
+      <div class="pt-2 hairline-t flex items-center gap-2">
+        <a href="/print-cv" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs btn-editorial-secondary">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Özgeçmiş (PDF)</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section class="relative pt-12 pb-20 md:py-24 overflow-hidden">
+  <!-- HERO BÖLÜMÜ (Editorial Bento Architecture) -->
+  <section class="relative pt-12 pb-20 md:pt-20 md:pb-28">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
         
-        <!-- Sol Taraf: Tanıtım Metinleri -->
-        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+        <!-- Sol Sütun: Editoryal Tanıtım (8 Kolon) -->
+        <div class="lg:col-span-8 flex flex-col justify-between space-y-8">
           
-          <!-- Durum Rozeti -->
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span id="hero-status">Yeni projelere & fırsatlara açık</span>
-          </div>
+          <div class="space-y-6">
+            <!-- Durum & Rol Üst Bilgisi -->
+            <div class="inline-flex items-center gap-2.5 px-3 py-1 rounded-md surface-card text-xs">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="font-mono text-[11px] tracking-tight text-zinc-600 dark:text-zinc-300" id="hero-status">Yazılım Uzmanı @ Konumsal Bilgi Sistemleri</span>
+            </div>
 
-          <!-- İsim ve Unvan -->
-          <div>
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-              Merhaba, ben <br class="hidden sm:inline">
-              <span class="bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent" id="hero-name">Ahmet Yılmaz</span>
-            </h1>
-            <p class="text-lg sm:text-xl font-medium text-slate-300 mt-3" id="hero-title">
-              Kıdemli Full Stack Yazılım Geliştirici
+            <!-- Ana Başlık (Editorial Serif + Neo-Grotesque Sans) -->
+            <div class="space-y-3">
+              <div class="font-mono text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400" id="hero-title">
+                Bilgisayar Mühendisi · Full Stack Yazılım Geliştirici
+              </div>
+              <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-semibold tracking-tight leading-[1.08]">
+                <span id="hero-name">Hasan Kaba</span><span class="text-zinc-400 dark:text-zinc-600 font-light"> — </span>
+                <span class="font-serif-editorial italic font-normal text-zinc-600 dark:text-zinc-300">kurumsal yazılım mimarisi & modern web sistemleri.</span>
+              </h1>
+            </div>
+
+            <!-- Biyografi -->
+            <p class="text-base sm:text-[17px] text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed font-normal" id="hero-bio">
+              5 yıllık yazılım geliştirme deneyimine sahip Bilgisayar Mühendisi. Java/Spring Boot backend ve React/Angular frontend teknolojilerinde uzmanlaşmış; kurumsal düzeyde web uygulamaları, mikroservis mimarileri ve ERP modülleri geliştirmiştir.
             </p>
           </div>
 
-          <!-- Biyografi -->
-          <p class="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed mx-auto lg:mx-0" id="hero-bio">
-            Modern web teknolojileri, bulut mimarileri ve kullanıcı odaklı sistemler geliştiren kıdemli yazılım mühendisi. 6+ yıllık tecrübemle yüksek erişilebilirlikli backend mimarileri ve modern kullanıcı arayüzleri inşa ediyorum.
-          </p>
-
-          <!-- İletişim & Lokasyon Rozetleri -->
-          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-400 pt-1">
-            <span class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-white/5">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span id="hero-location">İstanbul, Türkiye</span>
-            </span>
-            <span class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-white/5">
-              <i data-lucide="mail" class="w-3.5 h-3.5 text-brand-400"></i>
-              <span id="hero-email">iletisim@ahmetyilmaz.dev</span>
-            </span>
-          </div>
-
-          <!-- Aksiyon Butonları & Sosyal Ağlar -->
-          <div class="pt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-            <a href="#projects" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-500/25 transition">
-              <span>Çalışmalarımı İncele</span>
-              <i data-lucide="arrow-down" class="w-4 h-4"></i>
-            </a>
-            <a href="#contact" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition">
-              <i data-lucide="send" class="w-4 h-4"></i>
-              <span>İletişime Geç</span>
-            </a>
-          </div>
-
-          <!-- Sosyal Medya İkonları -->
-          <div class="pt-2 flex items-center justify-center lg:justify-start gap-3" id="hero-socials">
-            <!-- Dinamik doldurulacak -->
-          </div>
-        </div>
-
-        <!-- Sağ Taraf: Profil Görseli & Kartı -->
-        <div class="lg:col-span-5 flex justify-center">
-          <div class="relative group">
-            <!-- Arka Plan Işık Efekti -->
-            <div class="absolute -inset-2 bg-gradient-to-r from-brand-600 to-indigo-600 rounded-3xl blur-2xl opacity-40 group-hover:opacity-70 transition duration-500"></div>
-            
-            <div class="relative glass-card rounded-3xl p-4 sm:p-5 max-w-sm">
-              <div class="aspect-square rounded-2xl overflow-hidden bg-slate-800 relative">
-                <img id="hero-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" alt="Avatar" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-                <div class="absolute bottom-4 left-4 right-4 text-center">
-                  <div class="text-sm font-semibold text-white" id="hero-card-name">Ahmet Yılmaz</div>
-                  <div class="text-xs text-brand-300" id="hero-card-role">Full Stack Architect</div>
-                </div>
-              </div>
-
-              <!-- İstatistikler -->
-              <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/10 text-center" id="hero-stats">
-                <div>
-                  <div class="text-xl font-bold text-white" id="stat-years">6+</div>
-                  <div class="text-[10px] text-slate-400 uppercase tracking-wider">Yıl Deneyim</div>
-                </div>
-                <div>
-                  <div class="text-xl font-bold text-white" id="stat-projects">28+</div>
-                  <div class="text-[10px] text-slate-400 uppercase tracking-wider">Proje</div>
-                </div>
-                <div>
-                  <div class="text-xl font-bold text-white" id="stat-clients">18+</div>
-                  <div class="text-[10px] text-slate-400 uppercase tracking-wider">Müşteri</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- HAKKIMDA BÖLÜMÜ -->
-  <section id="about" class="py-20 border-t border-white/5 relative">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto mb-14">
-        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-400 uppercase bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20 mb-3">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span>Beni Tanıyın</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Hakkımda & Yetkinlikler</h2>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <!-- Paragraflar -->
-        <div class="lg:col-span-7 space-y-5 text-slate-300 leading-relaxed text-base" id="about-content">
-          <!-- Dinamik Paragraflar -->
-        </div>
-
-        <!-- Öne Çıkan Güçlü Yönler -->
-        <div class="lg:col-span-5">
-          <div class="glass-card rounded-2xl p-6 sm:p-7">
-            <h3 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
-              <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
-              <span>Temel Yetkinlik Odakları</span>
-            </h3>
-            <ul class="space-y-3.5" id="about-highlights">
-              <!-- Dinamik Maddeler -->
-            </ul>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- DENEYİM & EĞİTİM BÖLÜMÜ -->
-  <section id="experience" class="py-20 border-t border-white/5 bg-slate-900/30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-400 uppercase bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20 mb-3">
-          <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
-          <span>Kariyer Yolculuğum</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">İş Deneyimi & Eğitim</h2>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        
-        <!-- Sol Sütun: İş Deneyimleri -->
-        <div class="lg:col-span-7">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-bold text-white flex items-center gap-2.5">
-              <i data-lucide="layers" class="w-5 h-5 text-brand-400"></i>
-              <span>Profesyonel Deneyim</span>
-            </h3>
-            <span class="text-xs text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/5" id="exp-count">3 Pozisyon</span>
-          </div>
-
-          <div class="space-y-8" id="experience-list">
-            <!-- Dinamik Deneyim Maddeleri -->
-          </div>
-        </div>
-
-        <!-- Sağ Sütun: Eğitim & Sertifikalar -->
-        <div class="lg:col-span-5">
-          <div class="sticky top-28 space-y-8">
-            <div>
-              <div class="flex items-center justify-between mb-8">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2.5">
-                  <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-400"></i>
-                  <span>Eğitim Geçmişi</span>
-                </h3>
-              </div>
-
-              <div class="space-y-5" id="education-list">
-                <!-- Dinamik Eğitim Kartları -->
-              </div>
-            </div>
-
-            <!-- CV İndir Kartı -->
-            <div class="glass-card rounded-2xl p-6 border-brand-500/20 bg-gradient-to-br from-brand-900/20 to-transparent">
-              <h4 class="font-bold text-white text-base mb-2">CV'mi Yazdırın veya PDF Olarak Kaydedin</h4>
-              <p class="text-xs text-slate-400 mb-4 leading-relaxed">
-                Tüm deneyimlerimi, eğitim ve projelerimi tek bir sayfada sade ve kurumsal formatta görüntüleyin.
-              </p>
-              <a href="/print-cv" target="_blank" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-500/20 transition">
-                <i data-lucide="file-text" class="w-4 h-4"></i>
-                <span>Yazdırılabilir CV Görünümü</span>
+          <!-- Alt Bar: Aksiyonlar, Konum & Sosyal Bağlantılar -->
+          <div class="pt-6 hairline-t space-y-6">
+            <div class="flex flex-wrap items-center gap-3">
+              <a href="#projects" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm btn-editorial-primary">
+                <span>Seçkin Çalışmaları İncele</span>
+                <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+              </a>
+              <a href="#contact" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-xs sm:text-sm btn-editorial-secondary">
+                <span>İletişime Geç</span>
+              </a>
+              <a href="/print-cv" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm btn-editorial-secondary">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Özgeçmiş (A4)</span>
               </a>
             </div>
+
+            <!-- Meta Bilgiler & Sosyal Linkler -->
+            <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+              <div class="flex flex-wrap items-center gap-4">
+                <span class="inline-flex items-center gap-1.5">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                  <span id="hero-location">Ankara, Türkiye</span>
+                </span>
+                <span class="text-zinc-300 dark:text-zinc-700">/</span>
+                <a href="mailto:hasannkaba@gmail.com" class="inline-flex items-center gap-1.5 hover:text-zinc-900 dark:hover:text-zinc-100 transition" id="hero-email-anchor">
+                  <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                  <span id="hero-email">hasannkaba@gmail.com</span>
+                </a>
+              </div>
+
+              <!-- Sosyal İkonlar -->
+              <div class="flex items-center gap-2" id="hero-socials">
+                <!-- Dinamik doldurulacak -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sağ Sütun: Mimari Portre & Metrik Dossier Kartı (4 Kolon) -->
+        <div class="lg:col-span-4">
+          <div class="surface-card rounded-xl p-5 h-full flex flex-col justify-between space-y-5 relative overflow-hidden">
+            
+            <!-- Üst Etiket -->
+            <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
+              <span>PORTRE // DOSSIER</span>
+              <span>SYS.2026</span>
+            </div>
+
+            <!-- Görsel / Monogram Çerçevesi -->
+            <div class="relative aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden bg-zinc-900 hairline-border group">
+              <img id="hero-avatar" src="https://ui-avatars.com/api/?name=HK&size=512&background=121215&color=f4f4f5&bold=true" alt="Hasan Kaba" class="w-full h-full object-cover object-center grayscale-[15%] contrast-[1.04] group-hover:grayscale-0 group-hover:scale-[1.02] transition duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
+              <div class="absolute bottom-3.5 left-4 right-4 flex items-end justify-between">
+                <div>
+                  <div class="text-sm font-semibold text-white tracking-tight" id="hero-card-name">Hasan Kaba</div>
+                  <div class="text-[11px] font-mono text-zinc-300 truncate max-w-[220px]" id="hero-card-role">Bilgisayar Mühendisi</div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              </div>
+            </div>
+
+            <!-- Mimari Metrik Grid (3'lü) -->
+            <div class="grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-800/80 pt-4 hairline-t text-center" id="hero-stats">
+              <div class="px-2">
+                <div class="text-xl font-semibold tracking-tight font-mono" id="stat-years">5+</div>
+                <div class="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Yıl Deneyim</div>
+              </div>
+              <div class="px-2">
+                <div class="text-xl font-semibold tracking-tight font-mono" id="stat-projects">15+</div>
+                <div class="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Proje</div>
+              </div>
+              <div class="px-2">
+                <div class="text-xl font-semibold tracking-tight font-mono" id="stat-clients">10+</div>
+                <div class="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Kurum/Modül</div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -297,50 +250,158 @@
     </div>
   </section>
 
-  <!-- YETENEKLER BÖLÜMÜ -->
-  <section id="skills" class="py-20 border-t border-white/5">
+  <!-- 01 / HAKKIMDA & MÜHENDİSLİK YAKLAŞIMI -->
+  <section id="about" class="py-20 hairline-t">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center max-w-2xl mx-auto mb-14">
-        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-400 uppercase bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20 mb-3">
-          <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
-          <span>Teknoloji & Araçlar</span>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        
+        <!-- Sol Sütun: Bölüm İndeksi & Başlık (4 Kolon) -->
+        <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
+          <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 tracking-widest uppercase">
+            01 / HAKKIMDA
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight leading-snug">
+            Mühendislik disiplini &amp; <span class="font-serif-editorial italic font-normal">mimari yaklaşım.</span>
+          </h2>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-mono">
+            Büyük ölçekli kamu ve özel sektör sistemlerinde yüksek erişilebilirlik, temiz mimari ve sürdürülebilir kod standartları.
+          </p>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Teknik Yetenekler</h2>
-        <p class="text-slate-400 text-sm mt-3">Geliştirme süreçlerinde aktif kullandığım diller, kütüphaneler ve sistemler.</p>
-      </div>
 
-      <!-- Kategori Filtre Butonları -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-10" id="skill-categories">
-        <button class="skill-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white transition" data-category="all">Tümü</button>
-        <!-- Dinamik Kategoriler -->
-      </div>
+        <!-- Sağ Sütun: Biyografi & Yetkinlik Sütunları (8 Kolon) -->
+        <div class="lg:col-span-8 space-y-10">
+          
+          <!-- Paragraflar -->
+          <div class="space-y-4 text-zinc-600 dark:text-zinc-300 leading-relaxed text-[15px] sm:text-base" id="about-content">
+            <!-- Dinamik doldurulacak -->
+          </div>
 
-      <!-- Yetenek Grid'i -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" id="skills-grid">
-        <!-- Dinamik Yetenek Kartları -->
+          <!-- Odak Noktaları (Numaralı Mimari Grid) -->
+          <div class="pt-8 hairline-t">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                TEMEL UZMANLIK ALANLARI &amp; EKOSİSTEM
+              </h3>
+              <span class="text-[11px] font-mono text-zinc-400">SPEC // 01</span>
+            </div>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="about-highlights">
+              <!-- Dinamik doldurulacak -->
+            </ul>
+          </div>
+
+        </div>
+
       </div>
 
     </div>
   </section>
 
-  <!-- PROJELER BÖLÜMÜ -->
-  <section id="projects" class="py-20 border-t border-white/5 bg-slate-900/30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- 02 / KARİYER & AKADEMİK GEÇMİŞ (Editorial Ledger) -->
+  <section id="experience" class="py-20 hairline-t">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
       
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <!-- Bölüm Başlığı -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 hairline-b">
         <div>
-          <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-400 uppercase bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20 mb-3">
-            <i data-lucide="folder-git-2" class="w-3.5 h-3.5"></i>
-            <span>Portfolyo</span>
+          <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 tracking-widest uppercase mb-2">
+            02 / KARİYER &amp; AKADEMİ
           </div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Öne Çıkan Projelerim</h2>
+          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Profesyonel Deneyim <span class="font-serif-editorial italic font-normal text-zinc-500 dark:text-zinc-400">&amp; Eğitim Sicili</span>
+          </h2>
+        </div>
+        <span class="font-mono text-xs px-3 py-1 rounded-md surface-card w-fit" id="exp-count">3 Pozisyon</span>
+      </div>
+
+      <!-- İş Deneyimleri Sicil Listesi -->
+      <div class="space-y-4" id="experience-list">
+        <!-- Dinamik Deneyim Kartları -->
+      </div>
+
+      <!-- Eğitim Geçmişi & Kurumsal CV İndirme Bölümü -->
+      <div class="pt-10 hairline-t grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <div class="lg:col-span-4 space-y-2">
+          <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+            AKADEMİK GEÇMİŞ
+          </div>
+          <h3 class="text-xl font-semibold tracking-tight">Eğitim &amp; Dereceler</h3>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            Akademik formasyon ve mühendislik temelleri.
+          </p>
+        </div>
+
+        <div class="lg:col-span-8 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="education-list">
+            <!-- Dinamik Eğitim Kartları -->
+          </div>
+
+          <!-- A4 Özgeçmiş Banner -->
+          <div class="surface-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="text-sm font-semibold">Resmi Formatlı Özgeçmiş (A4 / PDF)</div>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                Tüm deneyim, eğitim ve teknik envanteri kurumsal A4 sayfa düzeninde görüntüleyin veya PDF olarak kaydedin.
+              </p>
+            </div>
+            <a href="/print-cv" target="_blank" class="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs btn-editorial-primary">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>A4 CV Görüntüle</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03 / TEKNİK MİMARİ & YETENEKLER (Specification Matrix) -->
+  <section id="skills" class="py-20 hairline-t">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 hairline-b mb-10">
+        <div>
+          <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 tracking-widest uppercase mb-2">
+            03 / TEKNİK MİMARİ
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Teknoloji Yığını <span class="font-serif-editorial italic font-normal text-zinc-500 dark:text-zinc-400">&amp; Araç Envanteri</span>
+          </h2>
+        </div>
+
+        <!-- Kategori Filtre Sekmeleri -->
+        <div class="flex flex-wrap items-center gap-1.5" id="skill-categories">
+          <button class="filter-tab active px-3 py-1.5 rounded-md text-xs font-mono" data-category="all">Tümü</button>
+        </div>
+      </div>
+
+      <!-- Yetenek Matrisi -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="skills-grid">
+        <!-- Dinamik Yetenek Spec Kartları -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 04 / SEÇKİN ÇALIŞMALAR & PROJELER (Curated Case Studies) -->
+  <section id="projects" class="py-20 hairline-t">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 hairline-b mb-10">
+        <div>
+          <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 tracking-widest uppercase mb-2">
+            04 / SEÇKİN ÇALIŞMALAR
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Geliştirilen Projeler <span class="font-serif-editorial italic font-normal text-zinc-500 dark:text-zinc-400">&amp; Kurumsal Modüller</span>
+          </h2>
         </div>
 
         <!-- Proje Kategori Filtreleri -->
-        <div class="flex flex-wrap items-center gap-2" id="project-categories">
-          <button class="project-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white transition" data-category="all">Tümü</button>
-          <!-- Dinamik filtreler eklenecek -->
+        <div class="flex flex-wrap items-center gap-1.5" id="project-categories">
+          <button class="filter-tab active px-3 py-1.5 rounded-md text-xs font-mono" data-category="all">Tümü</button>
         </div>
       </div>
 
@@ -352,101 +413,111 @@
     </div>
   </section>
 
-  <!-- İLETİŞİM BÖLÜMÜ -->
-  <section id="contact" class="py-20 border-t border-white/5">
+  <!-- 05 / İLETİŞİM & İŞ BİRLİĞİ -->
+  <section id="contact" class="py-20 hairline-t">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-400 uppercase bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20 mb-3">
-          <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-          <span>Bana Ulaşın</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Birlikte Yeni Şeyler İnşa Edelim</h2>
-        <p class="text-slate-400 text-sm mt-3">Bir projeniz mi var veya ekibinize yeni bir güç mü arıyorsunuz? Mesaj bırakın, en kısa sürede dönüş yapayım.</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
         
-        <!-- Sol Taraf: İletişim Bilgileri -->
-        <div class="lg:col-span-5 space-y-6">
-          <div class="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
-            <h3 class="text-xl font-bold text-white">İletişim Bilgileri</h3>
+        <!-- Sol Taraf: Doğrudan İletişim Kanalları (5 Kolon) -->
+        <div class="lg:col-span-5 space-y-8">
+          <div class="space-y-3">
+            <div class="font-mono text-xs text-zinc-400 dark:text-zinc-500 tracking-widest uppercase">
+              05 / İLETİŞİM
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight">
+              Yeni bir proje veya <span class="font-serif-editorial italic font-normal">iş birliği için ulaşın.</span>
+            </h2>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Kurumsal yazılım projeleri, teknik danışmanlık veya ekip içi roller için doğrudan e-posta gönderebilir ya da yandaki formu kullanabilirsiniz.
+            </p>
+          </div>
 
-            <div class="space-y-4">
-              <a href="#" id="contact-email-link" class="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition group">
-                <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shrink-0 group-hover:scale-110 transition">
-                  <i data-lucide="mail" class="w-5 h-5"></i>
+          <div class="space-y-3">
+            <a href="mailto:hasannkaba@gmail.com" id="contact-email-link" class="surface-card surface-card-interactive rounded-xl p-4 flex items-center justify-between group">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-9 h-9 rounded-lg hairline-border flex items-center justify-center text-zinc-500 dark:text-zinc-400 shrink-0">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
                 </div>
-                <div>
-                  <div class="text-xs text-slate-400 font-medium">E-Posta</div>
-                  <div class="text-sm font-semibold text-white" id="contact-email-val">iletisim@ahmetyilmaz.dev</div>
-                </div>
-              </a>
-
-              <a href="#" id="contact-phone-link" class="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition group">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition">
-                  <i data-lucide="phone" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <div class="text-xs text-slate-400 font-medium">Telefon / WhatsApp</div>
-                  <div class="text-sm font-semibold text-white" id="contact-phone-val">+90 (555) 123 45 67</div>
-                </div>
-              </a>
-
-              <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition group">
-                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
-                  <i data-lucide="map-pin" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <div class="text-xs text-slate-400 font-medium">Lokasyon</div>
-                  <div class="text-sm font-semibold text-white" id="contact-location-val">İstanbul, Türkiye</div>
+                <div class="min-w-0">
+                  <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">E-Posta</div>
+                  <div class="text-sm font-medium truncate" id="contact-email-val">hasannkaba@gmail.com</div>
                 </div>
               </div>
-            </div>
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+            </a>
 
-            <!-- Sosyal Medya -->
-            <div class="pt-4 border-t border-white/10">
-              <div class="text-xs font-medium text-slate-400 mb-3">Sosyal Medya Hesaplarım</div>
-              <div class="flex items-center gap-2.5" id="contact-socials">
-                <!-- Dinamik sosyal linkler -->
+            <a href="tel:+905332911149" id="contact-phone-link" class="surface-card surface-card-interactive rounded-xl p-4 flex items-center justify-between group">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-9 h-9 rounded-lg hairline-border flex items-center justify-center text-zinc-500 dark:text-zinc-400 shrink-0">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Telefon</div>
+                  <div class="text-sm font-medium truncate" id="contact-phone-val">+90 533 291 11 49</div>
+                </div>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+            </a>
+
+            <div class="surface-card rounded-xl p-4 flex items-center gap-3.5">
+              <div class="w-9 h-9 rounded-lg hairline-border flex items-center justify-center text-zinc-500 dark:text-zinc-400 shrink-0">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Konum</div>
+                <div class="text-sm font-medium" id="contact-location-val">Ankara, Türkiye</div>
               </div>
             </div>
+          </div>
 
+          <div class="pt-4 hairline-t">
+            <div class="text-[11px] font-mono uppercase tracking-wider text-zinc-400 mb-3">DİJİTAL PROFİLLER</div>
+            <div class="flex flex-wrap items-center gap-2" id="contact-socials">
+              <!-- Dinamik sosyal linkler -->
+            </div>
           </div>
         </div>
 
-        <!-- Sağ Taraf: Mesaj Formu -->
+        <!-- Sağ Taraf: Minimalist Stüdyo İletişim Formu (7 Kolon) -->
         <div class="lg:col-span-7">
-          <div class="glass-card rounded-2xl p-6 sm:p-8">
-            <h3 class="text-xl font-bold text-white mb-2">Doğrudan Mesaj Gönderin</h3>
-            <p class="text-xs text-slate-400 mb-6">Gönderdiğiniz mesajlar anında yönetim panelime düşer.</p>
+          <div class="surface-card rounded-xl p-6 sm:p-8">
+            <div class="flex items-center justify-between pb-4 mb-6 hairline-b">
+              <div>
+                <h3 class="text-base font-semibold">Doğrudan Mesaj Gönderin</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Mesajınız anında yönetim paneline iletilir.</p>
+              </div>
+              <span class="font-mono text-[11px] text-zinc-400">MSG // DIRECT</span>
+            </div>
 
             <form id="contact-form" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Adınız Soyadınız *</label>
-                  <input type="text" name="name" required placeholder="Örn: Ayşe Kaya" class="w-full bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+                  <label class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Adınız Soyadınız *</label>
+                  <input type="text" name="name" required placeholder="Ad Soyad" class="w-full editorial-input rounded-lg px-3.5 py-2.5 text-sm">
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">E-Posta Adresiniz *</label>
-                  <input type="email" name="email" required placeholder="adiniz@sirket.com" class="w-full bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+                  <label class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">E-Posta Adresiniz *</label>
+                  <input type="email" name="email" required placeholder="ornek@kurum.com" class="w-full editorial-input rounded-lg px-3.5 py-2.5 text-sm">
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Konu</label>
-                <input type="text" name="subject" placeholder="Örn: Proje Teklifi / İş Birliği" class="w-full bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+                <label class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Konu</label>
+                <input type="text" name="subject" placeholder="Proje / İş Birliği / Danışmanlık" class="w-full editorial-input rounded-lg px-3.5 py-2.5 text-sm">
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Mesajınız *</label>
-                <textarea name="message" rows="4" required placeholder="Projeniz veya fikriniz hakkında bilgi verin..." class="w-full bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition resize-none"></textarea>
+                <label class="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Mesajınız *</label>
+                <textarea name="message" rows="4" required placeholder="Detayları buraya yazabilirsiniz..." class="w-full editorial-input rounded-lg px-3.5 py-2.5 text-sm resize-none"></textarea>
               </div>
 
-              <button type="submit" id="contact-submit-btn" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-500/20 transition disabled:opacity-50">
-                <i data-lucide="send" class="w-4 h-4"></i>
-                <span>Mesajı Gönder</span>
-              </button>
+              <div class="pt-2">
+                <button type="submit" id="contact-submit-btn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-xs sm:text-sm btn-editorial-primary disabled:opacity-50">
+                  <span>Mesajı İlet</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -456,11 +527,11 @@
     </div>
   </section>
 
-  <!-- PROJE DETAY MODALI -->
-  <div id="project-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div class="glass-card bg-[#0f172a] border border-white/15 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative shadow-2xl">
-      <button id="close-project-modal" class="absolute top-5 right-5 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition">
-        <i data-lucide="x" class="w-5 h-5"></i>
+  <!-- PROJE DETAY MODALI (Case Study Drawer) -->
+  <div id="project-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="surface-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative shadow-2xl">
+      <button id="close-project-modal" class="absolute top-4 right-4 w-8 h-8 rounded-lg btn-editorial-secondary flex items-center justify-center z-10">
+        <i data-lucide="x" class="w-4 h-4"></i>
       </button>
 
       <div id="project-modal-content">
@@ -469,18 +540,16 @@
     </div>
   </div>
 
-  <!-- ALT BİLGİ (Footer) -->
-  <footer class="border-t border-white/5 py-8 text-center text-xs text-slate-500">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <!-- ALT BİLGİ (Architectural Footer) -->
+  <footer class="hairline-t py-8 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
-        © <span id="footer-year">2026</span> <span id="footer-name">Ahmet Yılmaz</span>. Tüm Hakları Saklıdır.
+        © <span id="footer-year">2026</span> <span id="footer-name">Hasan Kaba</span>. Tüm hakları saklıdır.
       </div>
-      <div class="flex items-center gap-4">
-        <a href="/admin" class="hover:text-brand-400 transition flex items-center gap-1.5">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          <span>Yönetim Paneli Girişi</span>
-        </a>
-        <a href="#" class="hover:text-white transition">Yukarı Çık ↑</a>
+      <div class="flex items-center gap-5">
+        <a href="/print-cv" target="_blank" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Özgeçmiş (PDF)</a>
+        <a href="/admin" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Yönetim</a>
+        <a href="#" class="hover:text-zinc-900 dark:hover:text-zinc-100 transition">Yukarı ↑</a>
       </div>
     </div>
   </footer>
