@@ -1,4 +1,4 @@
-<%@ WebHandler Language="C#" Class="CvApiHandler" %>
+﻿<%@ WebHandler Language="C#" Class="CvApiHandler" %>
 
 using System;
 using System.IO;
@@ -99,7 +99,7 @@ public class CvApiHandler : IHttpHandler
         {
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", false },
-                { "message", "Veri tabanı okunamadı." }
+                { "message", "Veri taban\u0131 okunamad\u0131." }
             }, 500);
             return;
         }
@@ -174,7 +174,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "İsim, e-posta ve mesaj alanları zorunludur." }
+                    { "message", "\u0130sim, e-posta ve mesaj alanlar\u0131 zorunludur." }
                 }, 400);
                 return;
             }
@@ -195,7 +195,7 @@ public class CvApiHandler : IHttpHandler
 
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Mesajınız başarıyla iletildi! En kısa sürede geri dönüş yapılacaktır." }
+                { "message", "Mesaj\u0131n\u0131z ba\u015far\u0131yla iletildi! En k\u0131sa s\u00fcrede geri d\u00f6n\u00fc\u015f yap\u0131lacakt\u0131r." }
             }, 200);
             return;
         }
@@ -224,7 +224,7 @@ public class CvApiHandler : IHttpHandler
 
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Giriş başarılı!" },
+                    { "message", "Giri\u015f ba\u015far\u0131l\u0131!" },
                     { "token", token },
                     { "user", new Dictionary<string, object> { { "username", adminUser } } }
                 }, 200);
@@ -233,7 +233,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Hatalı kullanıcı adı veya şifre!" }
+                    { "message", "Hatal\u0131 kullan\u0131c\u0131 ad\u0131 veya \u015fifre!" }
                 }, 401);
             }
             return;
@@ -249,7 +249,7 @@ public class CvApiHandler : IHttpHandler
 
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Başarıyla çıkış yapıldı." }
+                { "message", "Ba\u015far\u0131yla \u00e7\u0131k\u0131\u015f yap\u0131ld\u0131." }
             }, 200);
             return;
         }
@@ -271,7 +271,7 @@ public class CvApiHandler : IHttpHandler
         {
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", false },
-                { "message", "Yetkisiz erişim. Lütfen giriş yapın." }
+                { "message", "Yetkisiz eri\u015fim. L\u00fctfen giri\u015f yap\u0131n." }
             }, 401);
             return;
         }
@@ -306,7 +306,7 @@ public class CvApiHandler : IHttpHandler
             SaveData(dataFile, serializer, data);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Profil bilgileri güncellendi." },
+                { "message", "Profil bilgileri g\u00fcncellendi." },
                 { "profile", profile }
             }, 200);
             return;
@@ -321,7 +321,7 @@ public class CvApiHandler : IHttpHandler
             SaveData(dataFile, serializer, data);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Hakkımda bilgileri güncellendi." },
+                { "message", "Hakk\u0131mda bilgileri g\u00fcncellendi." },
                 { "about", about }
             }, 200);
             return;
@@ -337,7 +337,7 @@ public class CvApiHandler : IHttpHandler
                 { "company", GetString(body, "company") },
                 { "location", GetString(body, "location") },
                 { "startDate", GetString(body, "startDate") },
-                { "endDate", current ? "Günümüz" : GetString(body, "endDate") },
+                { "endDate", current ? "G\u00fcn\u00fcm\u00fcz" : GetString(body, "endDate") },
                 { "current", current },
                 { "description", GetString(body, "description") },
                 { "achievements", GetStringArray(body, "achievements", '\n') },
@@ -349,7 +349,7 @@ public class CvApiHandler : IHttpHandler
             SaveData(dataFile, serializer, data);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Deneyim başarıyla eklendi." },
+                { "message", "Deneyim ba\u015far\u0131yla eklendi." },
                 { "item", item }
             }, 200);
             return;
@@ -363,14 +363,14 @@ public class CvApiHandler : IHttpHandler
 
             if (method == "PUT")
             {
-                if (idx < 0) { WriteNotFound(res, serializer, "Deneyim bulunamadı."); return; }
+                if (idx < 0) { WriteNotFound(res, serializer, "Deneyim bulunamad\u0131."); return; }
                 var existing = AsDict(list[idx]);
                 bool current = GetBool(body, "current");
                 existing["title"] = GetString(body, "title");
                 existing["company"] = GetString(body, "company");
                 existing["location"] = GetString(body, "location");
                 existing["startDate"] = GetString(body, "startDate");
-                existing["endDate"] = current ? "Günümüz" : GetString(body, "endDate");
+                existing["endDate"] = current ? "G\u00fcn\u00fcm\u00fcz" : GetString(body, "endDate");
                 existing["current"] = current;
                 existing["description"] = GetString(body, "description");
                 existing["achievements"] = GetStringArray(body, "achievements", '\n');
@@ -380,7 +380,7 @@ public class CvApiHandler : IHttpHandler
                 SaveData(dataFile, serializer, data);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Deneyim güncellendi." },
+                    { "message", "Deneyim g\u00fcncellendi." },
                     { "item", existing }
                 }, 200);
                 return;
@@ -413,7 +413,7 @@ public class CvApiHandler : IHttpHandler
             SaveData(dataFile, serializer, data);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Eğitim bilgisi eklendi." },
+                { "message", "E\u011fitim bilgisi eklendi." },
                 { "item", item }
             }, 200);
             return;
@@ -427,7 +427,7 @@ public class CvApiHandler : IHttpHandler
 
             if (method == "PUT")
             {
-                if (idx < 0) { WriteNotFound(res, serializer, "Eğitim bulunamadı."); return; }
+                if (idx < 0) { WriteNotFound(res, serializer, "E\u011fitim bulunamad\u0131."); return; }
                 var existing = AsDict(list[idx]);
                 foreach (var kv in body) existing[kv.Key] = kv.Value;
                 list[idx] = existing;
@@ -435,7 +435,7 @@ public class CvApiHandler : IHttpHandler
                 SaveData(dataFile, serializer, data);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Eğitim güncellendi." },
+                    { "message", "E\u011fitim g\u00fcncellendi." },
                     { "item", existing }
                 }, 200);
                 return;
@@ -445,7 +445,7 @@ public class CvApiHandler : IHttpHandler
                 if (idx >= 0) { list.RemoveAt(idx); data["educations"] = list; SaveData(dataFile, serializer, data); }
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Eğitim silindi." }
+                    { "message", "E\u011fitim silindi." }
                 }, 200);
                 return;
             }
@@ -456,7 +456,7 @@ public class CvApiHandler : IHttpHandler
         {
             var item = new Dictionary<string, object> {
                 { "id", "sk-" + NowMs() },
-                { "category", GetString(body, "category", "Diğer") },
+                { "category", GetString(body, "category", "Di\u011fer") },
                 { "name", GetString(body, "name") },
                 { "level", GetInt(body, "level", 80) },
                 { "icon", GetString(body, "icon", "code") }
@@ -481,9 +481,9 @@ public class CvApiHandler : IHttpHandler
 
             if (method == "PUT")
             {
-                if (idx < 0) { WriteNotFound(res, serializer, "Yetenek bulunamadı."); return; }
+                if (idx < 0) { WriteNotFound(res, serializer, "Yetenek bulunamad\u0131."); return; }
                 var existing = AsDict(list[idx]);
-                existing["category"] = GetString(body, "category", "Diğer");
+                existing["category"] = GetString(body, "category", "Di\u011fer");
                 existing["name"] = GetString(body, "name");
                 existing["level"] = GetInt(body, "level", 80);
                 existing["icon"] = GetString(body, "icon", "code");
@@ -492,7 +492,7 @@ public class CvApiHandler : IHttpHandler
                 SaveData(dataFile, serializer, data);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Yetenek güncellendi." },
+                    { "message", "Yetenek g\u00fcncellendi." },
                     { "item", existing }
                 }, 200);
                 return;
@@ -533,7 +533,7 @@ public class CvApiHandler : IHttpHandler
             SaveData(dataFile, serializer, data);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Proje başarıyla eklendi." },
+                { "message", "Proje ba\u015far\u0131yla eklendi." },
                 { "item", item }
             }, 200);
             return;
@@ -547,7 +547,7 @@ public class CvApiHandler : IHttpHandler
 
             if (method == "PUT")
             {
-                if (idx < 0) { WriteNotFound(res, serializer, "Proje bulunamadı."); return; }
+                if (idx < 0) { WriteNotFound(res, serializer, "Proje bulunamad\u0131."); return; }
                 var existing = AsDict(list[idx]);
                 existing["title"] = GetString(body, "title");
                 existing["category"] = GetString(body, "category");
@@ -564,7 +564,7 @@ public class CvApiHandler : IHttpHandler
                 SaveData(dataFile, serializer, data);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Proje güncellendi." },
+                    { "message", "Proje g\u00fcncellendi." },
                     { "item", existing }
                 }, 200);
                 return;
@@ -606,7 +606,7 @@ public class CvApiHandler : IHttpHandler
             }
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Mesaj durumu güncellendi." }
+                { "message", "Mesaj durumu g\u00fcncellendi." }
             }, 200);
             return;
         }
@@ -662,7 +662,7 @@ public class CvApiHandler : IHttpHandler
                             File.WriteAllBytes(Path.Combine(uploadsDir, filename), fileBytes);
                             WriteJson(res, serializer, new Dictionary<string, object> {
                                 { "success", true },
-                                { "message", "Dosya başarıyla yüklendi." },
+                                { "message", "Dosya ba\u015far\u0131yla y\u00fcklendi." },
                                 { "url", "/uploads/" + filename }
                             }, 200);
                             return;
@@ -676,7 +676,7 @@ public class CvApiHandler : IHttpHandler
                             File.WriteAllBytes(Path.Combine(appUploadsDir, filename), fileBytes);
                             WriteJson(res, serializer, new Dictionary<string, object> {
                                 { "success", true },
-                                { "message", "Dosya başarıyla yüklendi." },
+                                { "message", "Dosya ba\u015far\u0131yla y\u00fcklendi." },
                                 { "url", "/api/media/" + filename }
                             }, 200);
                             return;
@@ -689,7 +689,7 @@ public class CvApiHandler : IHttpHandler
                 // Disk yazma tamamen kapalıysa doğrudan Base64 Data URI döndür (Asla hata vermez)
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Görsel başarıyla hazırlandı." },
+                    { "message", "G\u00f6rsel ba\u015far\u0131yla haz\u0131rland\u0131." },
                     { "url", base64Input }
                 }, 200);
                 return;
@@ -700,7 +700,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Lütfen yüklenecek bir dosya seçin." }
+                    { "message", "L\u00fctfen y\u00fcklenecek bir dosya se\u00e7in." }
                 }, 400);
                 return;
             }
@@ -723,7 +723,7 @@ public class CvApiHandler : IHttpHandler
                 file.SaveAs(targetPath);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Dosya başarıyla yüklendi." },
+                    { "message", "Dosya ba\u015far\u0131yla y\u00fcklendi." },
                     { "url", "/uploads/" + outName }
                 }, 200);
                 return;
@@ -738,7 +738,7 @@ public class CvApiHandler : IHttpHandler
                 file.SaveAs(appTargetPath);
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", true },
-                    { "message", "Dosya başarıyla yüklendi." },
+                    { "message", "Dosya ba\u015far\u0131yla y\u00fcklendi." },
                     { "url", "/api/media/" + outName }
                 }, 200);
                 return;
@@ -756,7 +756,7 @@ public class CvApiHandler : IHttpHandler
                     string mime = !string.IsNullOrEmpty(file.ContentType) ? file.ContentType : "image/jpeg";
                     WriteJson(res, serializer, new Dictionary<string, object> {
                         { "success", true },
-                        { "message", "Görsel başarıyla işlendi." },
+                        { "message", "G\u00f6rsel ba\u015far\u0131yla i\u015flendi." },
                         { "url", "data:" + mime + ";base64," + b64 }
                     }, 200);
                     return;
@@ -766,7 +766,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Görsel işlenemedi: " + ex.Message }
+                    { "message", "G\u00f6rsel i\u015flenemedi: " + ex.Message }
                 }, 500);
                 return;
             }
@@ -783,7 +783,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Mevcut ve yeni şifre gereklidir." }
+                    { "message", "Mevcut ve yeni \u015fifre gereklidir." }
                 }, 400);
                 return;
             }
@@ -792,7 +792,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Yeni şifre en az 6 karakter olmalıdır." }
+                    { "message", "Yeni \u015fifre en az 6 karakter olmal\u0131d\u0131r." }
                 }, 400);
                 return;
             }
@@ -803,7 +803,7 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Mevcut şifreniz hatalı." }
+                    { "message", "Mevcut \u015fifreniz hatal\u0131." }
                 }, 400);
                 return;
             }
@@ -823,7 +823,7 @@ public class CvApiHandler : IHttpHandler
 
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Şifreniz başarıyla güncellendi!" },
+                { "message", "\u015eifreniz ba\u015far\u0131yla g\u00fcncellendi!" },
                 { "token", token }
             }, 200);
             return;
@@ -844,19 +844,19 @@ public class CvApiHandler : IHttpHandler
             {
                 WriteJson(res, serializer, new Dictionary<string, object> {
                     { "success", false },
-                    { "message", "Geçersiz veri yedekleme formatı." }
+                    { "message", "Ge\u00e7ersiz veri yedekleme format\u0131." }
                 }, 400);
                 return;
             }
             SaveData(dataFile, serializer, body);
             WriteJson(res, serializer, new Dictionary<string, object> {
                 { "success", true },
-                { "message", "Veriler başarıyla içe aktarıldı ve geri yüklendi!" }
+                { "message", "Veriler ba\u015far\u0131yla i\u00e7e aktar\u0131ld\u0131 ve geri y\u00fcklendi!" }
             }, 200);
             return;
         }
 
-        WriteNotFound(res, serializer, "Geçersiz API rotası: " + route);
+        WriteNotFound(res, serializer, "Ge\u00e7ersiz API rotas\u0131: " + route);
     }
 
     // -------------------------------------------------------------
