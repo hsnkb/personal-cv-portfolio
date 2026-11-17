@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark scroll-smooth">
+<html lang="tr" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,14 +23,14 @@
     }
   </script>
 
-  <!-- Tema Başlangıç Kontrolü (Sayfa parlamasını önler) -->
+  <!-- Tema Başlangıç Kontrolü (Varsayılan Ferah Aydınlık Mod) -->
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('portfolio_theme');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.remove('dark');
-      } else {
+      const savedTheme = localStorage.getItem('portfolio_theme_v2');
+      if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
       }
     })();
   </script>
@@ -214,13 +214,13 @@
             </div>
 
             <!-- Görsel / Monogram Çerçevesi -->
-            <div class="relative aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden bg-zinc-900 hairline-border group">
-              <img id="hero-avatar" src="https://ui-avatars.com/api/?name=HK&size=512&background=121215&color=f4f4f5&bold=true" alt="Hasan Kaba" class="w-full h-full object-cover object-center grayscale-[15%] contrast-[1.04] group-hover:grayscale-0 group-hover:scale-[1.02] transition duration-500">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
+            <div class="relative aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 hairline-border group">
+              <img id="hero-avatar" src="https://ui-avatars.com/api/?name=HK&size=512&background=2563eb&color=ffffff&bold=true" alt="Hasan Kaba" class="w-full h-full object-cover object-center group-hover:scale-[1.02] transition duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/65 via-transparent to-transparent"></div>
               <div class="absolute bottom-3.5 left-4 right-4 flex items-end justify-between">
                 <div>
                   <div class="text-sm font-semibold text-white tracking-tight" id="hero-card-name">Hasan Kaba</div>
-                  <div class="text-[11px] font-mono text-zinc-300 truncate max-w-[220px]" id="hero-card-role">Bilgisayar Mühendisi</div>
+                  <div class="text-[11px] font-mono text-slate-200 truncate max-w-[220px]" id="hero-card-role">Bilgisayar Mühendisi</div>
                 </div>
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
               </div>

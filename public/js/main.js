@@ -56,7 +56,7 @@ function updateClock() {
   }
 }
 
-// Tema Değiştirici (Dark / Light)
+// Tema Değiştirici (Light / Dark)
 function setupThemeToggle() {
   const btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
@@ -65,10 +65,10 @@ function setupThemeToggle() {
     const isDark = html.classList.contains('dark');
     if (isDark) {
       html.classList.remove('dark');
-      localStorage.setItem('portfolio_theme', 'light');
+      localStorage.setItem('portfolio_theme_v2', 'light');
     } else {
       html.classList.add('dark');
-      localStorage.setItem('portfolio_theme', 'dark');
+      localStorage.setItem('portfolio_theme_v2', 'dark');
     }
   });
 }
@@ -136,11 +136,11 @@ function renderProfile() {
     document.getElementById('nav-initials').innerText = initials;
   }
 
-  // Avatar (Eski mavi ui-avatars linki varsa sofistike monokrom stüdyo monogramına çevir)
+  // Avatar (Ferah kurumsal mavi monogram veya yüklenen fotoğraf)
   if (p.avatar) {
     let avatarUrl = p.avatar;
-    if (avatarUrl.includes('ui-avatars.com') && avatarUrl.includes('1d4ed8')) {
-      avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=512&background=121215&color=f4f4f5&bold=true&font-size=0.36`;
+    if (avatarUrl.includes('ui-avatars.com')) {
+      avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=512&background=2563eb&color=ffffff&bold=true&font-size=0.36`;
     }
     document.getElementById('hero-avatar').src = avatarUrl;
   }
@@ -446,7 +446,7 @@ function renderProjects() {
       </div>
 
       <!-- Görsel Çerçevesi -->
-      <div class="aspect-[16/10] overflow-hidden relative bg-zinc-900 hairline-b">
+      <div class="aspect-[16/10] overflow-hidden relative bg-slate-100 dark:bg-slate-800 hairline-b">
         <img src="${escapeHtml(proj.image)}" alt="${escapeHtml(proj.title)}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
       </div>
 
@@ -521,7 +521,7 @@ function openProjectModal(projectId) {
         <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">${escapeHtml(proj.summary)}</p>
       </div>
 
-      <div class="aspect-[16/9] rounded-xl overflow-hidden bg-zinc-900 hairline-border">
+      <div class="aspect-[16/9] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 hairline-border">
         <img src="${escapeHtml(proj.image)}" alt="${escapeHtml(proj.title)}" class="w-full h-full object-cover">
       </div>
 
